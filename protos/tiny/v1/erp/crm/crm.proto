@@ -1,0 +1,344 @@
+syntax = "proto3";
+
+package tiny.v1.erp.crm;
+
+// ============================================================
+// ERP CRM Module — Lead, Pipeline, Stage, LostReason, Team
+// ============================================================
+
+// ─── Lead Service ───────────────────────────────────────────
+
+service LeadService {
+  rpc CreateLead(CreateLeadRequest) returns (CreateLeadResponse);
+  rpc UpdateLead(UpdateLeadRequest) returns (UpdateLeadResponse);
+  rpc DeleteLead(DeleteLeadRequest) returns (DeleteLeadResponse);
+  rpc GetLead(GetLeadRequest) returns (GetLeadResponse);
+  rpc ListLeads(ListLeadsRequest) returns (ListLeadsResponse);
+
+  // Pipeline actions
+  rpc MarkWon(MarkWonRequest) returns (MarkWonResponse);
+  rpc MarkLost(MarkLostRequest) returns (MarkLostResponse);
+  rpc MoveToStage(MoveToStageRequest) returns (MoveToStageResponse);
+  rpc ConvertToOrder(ConvertToOrderRequest) returns (ConvertToOrderResponse);
+
+  // Pipeline summary (Kanban aggregation)
+  rpc GetPipelineSummary(GetPipelineSummaryRequest) returns (GetPipelineSummaryResponse);
+}
+
+// ─── Stage Service ──────────────────────────────────────────
+
+service CrmStageService {
+  rpc ListCrmStages(ListCrmStagesRequest) returns (ListCrmStagesResponse);
+}
+
+// ─── Lost Reason Service ────────────────────────────────────
+
+service LostReasonService {
+  rpc ListLostReasons(ListLostReasonsRequest) returns (ListLostReasonsResponse);
+}
+
+// ─── Team Service ───────────────────────────────────────────
+
+service CrmTeamService {
+  rpc ListCrmTeams(ListCrmTeamsRequest) returns (ListCrmTeamsResponse);
+}
+
+// ════════════════════════════════════════════════════════════
+//  Messages — Lead
+// ════════════════════════════════════════════════════════════
+
+message Lead {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  bool active = 4;
+  string lead_type = 5;   // "lead" | "opportunity"
+  string priority = 6;    // "normal" | "low" | "high" | "very_high"
+  optional int32 color = 7;
+  optional string description = 8;
+  optional string referred = 9;
+
+  // Pipeline
+  optional string stage_id = 10;
+  double probability = 11;
+  optional double automated_probability = 12;
+  string won_status = 13; // "pending" | "won" | "lost"
+  optional string lost_reason_id = 14;
+
+  // Revenue (Decimal as string)
+  string expected_revenue = 15;
+  optional string prorated_revenue = 16;
+  optional string recurring_revenue = 17;
+  optional string recurring_plan_id = 18;
+  optional string recurring_revenue_monthly = 19;
+  optional string recurring_revenue_monthly_prorated = 20;
+
+  // Relations
+  optional string user_id = 21;
+  optional string team_id = 22;
+  optional string partner_id = 23;
+  optional string commercial_partner_id = 24;
+
+  // Dates
+  optional string date_open = 25;
+  optional string date_closed = 26;
+  optional string date_deadline = 27;
+  optional string date_conversion = 28;
+  optional string date_last_stage_update = 29;
+
+  // Contact
+  optional string contact_name = 30;
+  optional string partner_name = 31;
+  optional string email_from = 32;
+  optional string phone = 33;
+  optional string website = 34;
+
+  // Address
+  optional string street = 35;
+  optional string street2 = 36;
+  optional string city = 37;
+  optional string zip = 38;
+  optional string state_id = 39;
+  optional string country_id = 40;
+  optional string lang_id = 41;
+
+  // UTM
+  optional string campaign_id = 42;
+  optional string medium_id = 43;
+  optional string source_id = 44;
+
+  // Audit
+  string created_at = 45;
+  string updated_at = 46;
+  optional string created_by = 47;
+  optional string updated_by = 48;
+  int32 version = 49;
+}
+
+/// List / Kanban 摘要
+message LeadSummary {
+  string id = 1;
+  string name = 2;
+  string lead_type = 3;
+  string priority = 4;
+  optional string stage_name = 5;
+  optional string user_name = 6;
+  optional string team_name = 7;
+  optional string partner_name = 8;
+  string expected_revenue = 9;
+  double probability = 10;
+  string won_status = 11;
+  optional string email_from = 12;
+  optional string phone = 13;
+  optional string date_deadline = 14;
+  optional int32 color = 15;
+  bool active = 16;
+  string created_at = 17;
+}
+
+// ─── CRUD ───
+
+message CreateLeadRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string lead_type = 3;
+  optional string priority = 4;
+  optional string description = 5;
+  optional string expected_revenue = 6;
+  optional double probability = 7;
+  optional string stage_id = 8;
+  optional string user_id = 9;
+  optional string team_id = 10;
+  optional string partner_id = 11;
+  optional string contact_name = 12;
+  optional string partner_name = 13;
+  optional string email_from = 14;
+  optional string phone = 15;
+  optional string website = 16;
+  optional int32 color = 17;
+}
+
+message CreateLeadResponse {
+  Lead lead = 1;
+}
+
+message UpdateLeadRequest {
+  string id = 1;
+  string tenant_id = 2;
+  int32 version = 3;
+  string name = 4;
+  optional string lead_type = 5;
+  optional string priority = 6;
+  optional string description = 7;
+  optional string expected_revenue = 8;
+  optional double probability = 9;
+  optional string stage_id = 10;
+  optional string user_id = 11;
+  optional string team_id = 12;
+  optional string partner_id = 13;
+  optional string contact_name = 14;
+  optional string partner_name = 15;
+  optional string email_from = 16;
+  optional string phone = 17;
+  optional string website = 18;
+  optional string date_deadline = 19;
+  optional int32 color = 20;
+}
+
+message UpdateLeadResponse {
+  Lead lead = 1;
+}
+
+message DeleteLeadRequest {
+  string id = 1;
+}
+
+message DeleteLeadResponse {}
+
+message GetLeadRequest {
+  string id = 1;
+}
+
+message GetLeadResponse {
+  optional Lead lead = 1;
+}
+
+message ListLeadsRequest {
+  string tenant_id = 1;
+  int64 offset = 2;
+  int64 limit = 3;
+  // Filters
+  optional string search = 4;
+  optional string lead_type = 5;
+  optional string stage_id = 6;
+  optional string user_id = 7;
+  optional string team_id = 8;
+  optional string priority = 9;
+  optional string won_status = 10;
+  optional bool active_only = 11;
+}
+
+message ListLeadsResponse {
+  repeated LeadSummary items = 1;
+  int64 total = 2;
+}
+
+// ─── Pipeline Actions ───
+
+message MarkWonRequest {
+  string lead_id = 1;
+}
+
+message MarkWonResponse {
+  Lead lead = 1;
+}
+
+message MarkLostRequest {
+  string lead_id = 1;
+  optional string lost_reason_id = 2;
+}
+
+message MarkLostResponse {
+  Lead lead = 1;
+}
+
+message MoveToStageRequest {
+  string lead_id = 1;
+  string stage_id = 2;
+}
+
+message MoveToStageResponse {
+  Lead lead = 1;
+}
+
+message ConvertToOrderRequest {
+  string lead_id = 1;
+}
+
+message ConvertToOrderResponse {
+  string lead_id = 1;
+}
+
+// ─── Pipeline Summary ───
+
+message GetPipelineSummaryRequest {
+  string tenant_id = 1;
+}
+
+message GetPipelineSummaryResponse {
+  repeated PipelineStageSummary stages = 1;
+}
+
+message PipelineStageSummary {
+  string stage_id = 1;
+  string stage_name = 2;
+  optional int32 stage_sequence = 3;
+  bool is_won = 4;
+  int64 lead_count = 5;
+  string total_expected_revenue = 6;
+}
+
+// ════════════════════════════════════════════════════════════
+//  Messages — CRM Stage
+// ════════════════════════════════════════════════════════════
+
+message CrmStage {
+  string id = 1;
+  string name = 2;
+  optional int32 sequence = 3;
+  bool is_won = 4;
+  optional int32 rotting_threshold_days = 5;
+  optional string requirements = 6;
+  bool fold = 7;
+  optional int32 color = 8;
+  bool active = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  int32 version = 12;
+}
+
+message ListCrmStagesRequest {}
+
+message ListCrmStagesResponse {
+  repeated CrmStage items = 1;
+}
+
+// ════════════════════════════════════════════════════════════
+//  Messages — Lost Reason
+// ════════════════════════════════════════════════════════════
+
+message LostReason {
+  string id = 1;
+  string name = 2;
+  bool active = 3;
+  int32 version = 4;
+}
+
+message ListLostReasonsRequest {}
+
+message ListLostReasonsResponse {
+  repeated LostReason items = 1;
+}
+
+// ════════════════════════════════════════════════════════════
+//  Messages — CRM Team (sale.teams)
+// ════════════════════════════════════════════════════════════
+
+message CrmTeam {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional int32 sequence = 4;
+  bool active = 5;
+  optional string user_id = 6;
+  optional int32 color = 7;
+  int32 version = 8;
+}
+
+message ListCrmTeamsRequest {
+  string tenant_id = 1;
+}
+
+message ListCrmTeamsResponse {
+  repeated CrmTeam items = 1;
+}

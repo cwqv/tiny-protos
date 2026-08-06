@@ -1,0 +1,225 @@
+syntax = "proto3";
+
+package tiny.v1.erp.stock;
+
+// ============================================================
+// ERP Stock Module — Stock Picking (拣货/调拨单)
+// ============================================================
+
+// ─── Stock Picking Service ──────────────────────────────────
+
+service StockPickingService {
+  rpc CreatePicking(CreatePickingRequest) returns (CreatePickingResponse);
+  rpc UpdatePicking(UpdatePickingRequest) returns (UpdatePickingResponse);
+  rpc DeletePicking(DeletePickingRequest) returns (DeletePickingResponse);
+  rpc GetPicking(GetPickingRequest) returns (GetPickingResponse);
+  rpc ListPickings(ListPickingsRequest) returns (ListPickingsResponse);
+  rpc SearchPickings(SearchPickingsRequest) returns (SearchPickingsResponse);
+  rpc CheckAvailability(CheckAvailabilityRequest) returns (CheckAvailabilityResponse);
+  rpc ValidatePicking(ValidatePickingRequest) returns (ValidatePickingResponse);
+  rpc CancelPicking(CancelPickingRequest) returns (CancelPickingResponse);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — StockMove
+// ═══════════════════════════════════════════════════════════
+
+message StockMove {
+  string id = 1;
+  string tenant_id = 2;
+  optional int32 sequence = 3;
+  optional string priority = 4;
+  string date = 5;
+  optional string date_deadline = 6;
+  string product_id = 7;
+  optional string description_picking_manual = 8;
+  string product_uom_qty = 9;      // Decimal as string
+  string product_uom = 10;
+  string quantity = 11;            // Decimal as string
+  string location_id = 12;
+  string location_dest_id = 13;
+  optional string location_final_id = 14;
+  optional string partner_id = 15;
+  optional string picking_id = 16;
+  string state = 17;               // draft, assigned, done, cancelled
+  bool picked = 18;
+  optional string price_unit = 19; // Decimal as string
+  optional string origin = 20;
+  optional string picking_type_id = 21;
+  optional string group_id = 22;
+  bool active = 23;
+  string created_at = 24;
+  string updated_at = 25;
+  optional string created_by = 26;
+  optional string updated_by = 27;
+  int32 version = 28;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — StockPicking
+// ═══════════════════════════════════════════════════════════
+
+message StockPicking {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string origin = 4;
+  optional string note = 5;
+  string state = 6;                // draft, assigned, done, cancelled
+  optional string priority = 7;
+  optional string move_type = 8;
+  optional string scheduled_date = 9;
+  optional string date_deadline = 10;
+  optional string date_done = 11;
+  string location_id = 12;
+  string location_dest_id = 13;
+  string picking_type_id = 14;
+  optional string partner_id = 15;
+  optional string user_id = 16;
+  optional string backorder_id = 17;
+  optional string return_id = 18;
+  optional string owner_id = 19;
+  bool printed = 20;
+  bool is_locked = 21;
+  repeated StockMove moves = 22;
+  bool active = 23;
+  string created_at = 24;
+  string updated_at = 25;
+  optional string created_by = 26;
+  optional string updated_by = 27;
+  int32 version = 28;
+}
+
+message StockPickingSummary {
+  string id = 1;
+  optional string name = 2;
+  string picking_type_id = 3;
+  optional string origin = 4;
+  optional string partner_id = 5;
+  optional string partner_name = 6;
+  string state = 7;
+  optional string scheduled_date = 8;
+  optional string date_done = 9;
+  int64 move_count = 10;
+  optional string backorder_id = 11;
+  string created_at = 12;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Requests/Responses
+// ═══════════════════════════════════════════════════════════
+
+message CreateStockMoveRequest {
+  optional int32 sequence = 1;
+  string product_id = 2;
+  string product_uom = 3;
+  string location_id = 4;
+  string location_dest_id = 5;
+  string product_uom_qty = 6;
+  optional string origin = 7;
+}
+
+message CreatePickingRequest {
+  string tenant_id = 1;
+  string picking_type_id = 2;
+  string location_id = 3;
+  string location_dest_id = 4;
+  optional string name = 5;
+  optional string partner_id = 6;
+  optional string scheduled_date = 7;
+  optional string origin = 8;
+  optional string note = 9;
+  repeated CreateStockMoveRequest moves = 10;
+}
+
+message CreatePickingResponse {
+  StockPicking picking = 1;
+}
+
+message UpdatePickingRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string note = 4;
+  optional string scheduled_date = 5;
+  optional string date_deadline = 6;
+  optional string priority = 7;
+  int32 version = 8;
+}
+
+message UpdatePickingResponse {
+  StockPicking picking = 1;
+}
+
+message DeletePickingRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeletePickingResponse {
+  bool success = 1;
+}
+
+message GetPickingRequest {
+  string id = 1;
+}
+
+message GetPickingResponse {
+  optional StockPicking picking = 1;
+}
+
+message ListPickingsRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string state = 3;
+  optional string picking_type_id = 4;
+  optional int64 limit = 5;
+  optional int64 offset = 6;
+}
+
+message ListPickingsResponse {
+  repeated StockPickingSummary items = 1;
+}
+
+message SearchPickingsRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int64 limit = 3;
+}
+
+message SearchPickingsResponse {
+  repeated StockPickingSummary items = 1;
+}
+
+message CheckAvailabilityRequest {
+  string picking_id = 1;
+}
+
+message CheckAvailabilityResponse {
+  StockPicking picking = 1;
+}
+
+message MoveTransfer {
+  string move_id = 1;
+  string quantity = 2; // Decimal as string
+}
+
+message ValidatePickingRequest {
+  string picking_id = 1;
+  repeated MoveTransfer transfers = 2;
+  bool create_backorder = 3;
+}
+
+message ValidatePickingResponse {
+  StockPicking picking = 1;
+  optional StockPicking backorder = 2;
+}
+
+message CancelPickingRequest {
+  string picking_id = 1;
+  optional string reason = 2;
+}
+
+message CancelPickingResponse {
+  StockPicking picking = 1;
+}

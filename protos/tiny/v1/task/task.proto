@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package tiny.v1.task;
+
+import "tiny/v1/sys/common.proto";
+
+// ============ Data Structures ============
+
+// TaskDTO: A flat structure optimized for wire transmission.
+// Corresponds to the TaskEntity in Rust but simplified for protobuf.
+message TaskDTO {
+  string uuid = 1;
+  string title = 2;
+  string status = 3;        // pending, completed, deleted, waiting
+  double urgency = 4;       // calculated score
+  repeated string tags = 5;
+  optional string project = 6;
+  optional int64 due = 7;   // timestamp (seconds)
+  optional int64 wait = 8;
+  optional int64 end = 9;   // completion time
+  optional int64 modified = 10;
+  // User Defined Attributes (UDAs) stored as JSON string
+  string json_body = 11;
+}
+
+// ============ Service Definition ============
+
+service TaskService {
+  // --- Direct Mode / MVP Operations ---
+
+  // Create a task directly (Server authoritative)
+  // Used when online or for testing.
+  rpc CreateTask(CreateTaskRequest) returns (TaskDTO);
+
+  // List tasks with basic filtering
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+
+  // --- Sync Mode Operations (Phase 2+) ---
+
+  // Push a batch of operations from Client Outbox
+  rpc SyncTasks(SyncTasksRequest) returns (SyncTasksResponse);
+
+  // Pull changes from Server since version X
+  rpc PullTasks(PullTasksRequest) returns (PullTasksResponse);
+}
+
+// ============ Requests / Responses ============
+
+message CreateTaskRequest {
+  string title = 1;
+  repeated string tags = 2;
+  optional string project = 3;
+  optional int64 due = 4;
+  // Optional: Client generated UUID to ensure idempotency
+  optional string request_uuid = 5;
+}
+
+message ListTasksRequest {
+  // "pending", "completed", "all"
+  string status_filter = 1;
+  // e.g. "project:work +urgent"
+  optional string filter_expression = 2;
+  optional tiny.v1.sys.PaginationRequest pagination = 3;
+}
+
+message ListTasksResponse {
+  repeated TaskDTO tasks = 1;
+  tiny.v1.sys.PaginationMetadata pagination = 2;
+}
+
+message SyncTasksRequest {
+  repeated TaskOperation operations = 1;
+}
+
+message TaskOperation {
+  string operation_id = 1; // Outbox ID
+  string entity_uuid = 2;
+  string type = 3; // "create", "update", "delete"
+  string payload_json = 4; // Full DTO or Delta JSON
+  int64 occurred_at = 5;
+}
+
+message SyncTasksResponse {
+  repeated string ack_ids = 1; // IDs of successfully processed operations
+  repeated SyncError errors = 2;
+}
+
+message SyncError {
+  string operation_id = 1;
+  string code = 2;
+  string message = 3;
+}
+
+message PullTasksRequest {
+  int64 last_synced_version = 1;
+  int32 batch_size = 2;
+}
+
+message PullTasksResponse {
+  repeated TaskDTO updates = 1;
+  int64 new_version = 2;
+  bool has_more = 3;
+}

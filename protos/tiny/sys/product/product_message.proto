@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package tiny.sys.product;
+// ============ Enums ============
+
+/// 产品状态枚举
+enum ProductStatus {
+  // Default value (required by proto3)
+  ProductStatus_UNSPECIFIED = 0;
+  /// 产品处于草稿状态，未发布
+  ProductStatus_DRAFT = 1;
+  /// 产品已上架销售
+  ProductStatus_ACTIVE = 2;
+  /// 产品已下架，暂停销售
+  ProductStatus_INACTIVE = 3;
+  /// 产品暂时缺货
+  ProductStatus_OUTOFSTOCK = 4;
+}
+
+
+
+// ============ Product Message ============
+
+message Product {
+  string id = 1;  // 产品ID
+  string name = 2;  // 产品名称
+  string sku = 3;  // 产品编号（Stock Keeping Unit）
+  string description = 4;  // 产品描述
+  string price = 5;  // 销售价格
+  string cost_price = 6;  // 成本价格（内部使用）
+  double discount_percentage = 7;  // 折扣百分比
+  string status = 8;  // 产品状态
+  string category_id = 9;  // 分类ID
+  repeated string images = 10;  // 产品图片URL列表
+  map<string, string> attributes = 11;  // 产品自定义属性
+  string internal_notes = 12;  // 内部备注（不对外公开）
+  string created_at = 13;  // 创建时间
+  string updated_at = 14;  // 更新时间
+  string deleted_at = 15;  // 删除时间（软删除）
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package tiny.sys.product;
+
+
+import "tiny/v1/sys/common.proto";
+import "tiny/sys/product/product_message.proto";
+import "tiny/sys/product/product_requests.proto";// ============ ProductServiceService ============
+
+service ProductServiceService {
+  
+}

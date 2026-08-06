@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package tiny.v1.sys;
+
+// ============ Common Messages ============
+
+// 错误消息
+message Error {
+  string code = 1;              // 错误代码
+  string message = 2;           // 错误消息
+  optional string details = 3;  // 错误详情
+}
+
+// 审计信息（创建/更新时间和用户）
+message AuditInfo {
+  string created_at = 1;
+  string updated_at = 2;
+  optional string created_by = 3;
+  optional string updated_by = 4;
+}
+
+// 分页请求
+message PaginationRequest {
+  int32 page = 1;        // 页码（从1开始）
+  int32 page_size = 2;   // 每页大小
+}
+
+// 分页元数据
+message PaginationMetadata {
+  int32 page = 1;          // 当前页码
+  int32 page_size = 2;     // 每页大小
+  int32 total_items = 3;   // 总记录数
+  int32 total_pages = 4;   // 总页数
+}
+
+// 空消息（用于不需要参数的请求/响应）
+message Empty {}
+
+// 成功响应（用于只需要返回成功状态的操作）
+message SuccessResponse {
+  bool success = 1;
+  optional string message = 2;
+}
+
+// ID请求（通用的根据ID查询请求）
+message IdRequest {
+  string id = 1;
+  optional string tenant_id = 2;
+}
+
+// 批量ID请求
+message IdsRequest {
+  repeated string ids = 1;
+  optional string tenant_id = 2;
+}
+
+// 删除响应
+message DeleteResponse {
+  bool success = 1;
+  int32 deleted_count = 2;  // 删除的记录数
+}
+
+// 排序选项
+message SortOption {
+  string field = 1;         // 排序字段
+  bool descending = 2;      // 是否降序
+}
+
+// 过滤条件
+message FilterCondition {
+  string field = 1;         // 字段名
+  string operator = 2;      // 操作符 (eq, ne, gt, gte, lt, lte, like, in)
+  string value = 3;         // 值
+}
+
+// 查询选项（包含分页、排序、过滤）
+message QueryOptions {
+  optional PaginationRequest pagination = 1;
+  repeated SortOption sort = 2;
+  repeated FilterCondition filters = 3;
+}
+
+// ============ Common Enums ============
+
+// 用户角色枚举
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;      // 未指定
+  USER_ROLE_OWNER = 1;            // 所有者
+  USER_ROLE_ADMIN = 2;            // 管理员
+  USER_ROLE_MEMBER = 3;           // 成员
+  USER_ROLE_GUEST = 4;            // 访客
+}

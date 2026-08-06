@@ -1,0 +1,264 @@
+syntax = "proto3";
+
+package tiny.v1.erp.purchase;
+
+// ============================================================
+// ERP Purchase Module — PurchaseOrder + PurchaseOrderLine
+// ============================================================
+
+// ─── PurchaseOrder Service ──────────────────────────────────
+
+service PurchaseOrderService {
+  rpc CreatePurchaseOrder(CreatePurchaseOrderRequest) returns (CreatePurchaseOrderResponse);
+  rpc UpdatePurchaseOrder(UpdatePurchaseOrderRequest) returns (UpdatePurchaseOrderResponse);
+  rpc DeletePurchaseOrder(DeletePurchaseOrderRequest) returns (DeletePurchaseOrderResponse);
+  rpc GetPurchaseOrder(GetPurchaseOrderRequest) returns (GetPurchaseOrderResponse);
+  rpc ListPurchaseOrders(ListPurchaseOrdersRequest) returns (ListPurchaseOrdersResponse);
+  rpc SearchPurchaseOrders(SearchPurchaseOrdersRequest) returns (SearchPurchaseOrdersResponse);
+  rpc ConfirmPurchaseOrder(ConfirmPurchaseOrderRequest) returns (ConfirmPurchaseOrderResponse);
+  rpc CancelPurchaseOrder(CancelPurchaseOrderRequest) returns (CancelPurchaseOrderResponse);
+}
+
+// ─── Messages ───────────────────────────────────────────────
+
+message PurchaseOrder {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string priority = 4;
+  optional string origin = 5;
+  optional string partner_ref = 6;
+  string partner_id = 7;
+  string state = 8;
+  bool locked = 9;
+  bool acknowledged = 10;
+  string date_order = 11;                 // RFC3339
+  optional string date_approve = 12;      // RFC3339
+  optional string date_planned = 13;      // RFC3339
+  optional string note = 14;
+  optional string dest_address_id = 15;
+  string currency_id = 16;
+  optional double currency_rate = 17;
+  optional string fiscal_position_id = 18;
+  optional string payment_term_id = 19;
+  optional string incoterm_id = 20;
+  optional string user_id = 21;
+  string amount_untaxed = 22;             // Decimal as string
+  string amount_tax = 23;
+  string amount_total = 24;
+  string amount_total_cc = 25;
+  optional int32 invoice_count = 26;
+  optional string invoice_status = 27;
+  bool receipt_reminder_email = 28;
+  optional int32 reminder_date_before_receipt = 29;
+  bool is_late = 30;
+  repeated PurchaseOrderLine lines = 31;
+  bool active = 32;
+  string created_at = 33;
+  string updated_at = 34;
+  optional string created_by = 35;
+  optional string updated_by = 36;
+  int32 version = 37;
+}
+
+message PurchaseOrderLine {
+  string id = 1;
+  string tenant_id = 2;
+  string order_id = 3;
+  int32 sequence = 4;
+  optional string product_id = 5;
+  string name = 6;
+  double product_qty = 7;
+  optional double product_uom_qty = 8;
+  double price_unit = 9;
+  double discount = 10;
+  optional string date_planned = 11;
+  optional string product_uom_id = 12;
+  string price_subtotal = 13;
+  double price_tax = 14;
+  string price_total = 15;
+  double qty_invoiced = 16;
+  optional string qty_received_method = 17;
+  double qty_received = 18;
+  double qty_received_manual = 19;
+  double qty_to_invoice = 20;
+  optional string partner_id = 21;
+  optional string display_type = 22;
+  bool is_downpayment = 23;
+  optional double technical_price_unit = 24;
+  bool active = 25;
+  string created_at = 26;
+  string updated_at = 27;
+  optional string created_by = 28;
+  optional string updated_by = 29;
+  int32 version = 30;
+}
+
+message PurchaseOrderSummary {
+  string id = 1;
+  string name = 2;
+  string partner_id = 3;
+  optional string partner_name = 4;
+  string state = 5;
+  string date_order = 6;
+  optional string date_planned = 7;
+  string amount_untaxed = 8;
+  string amount_total = 9;
+  optional string invoice_status = 10;
+  optional string user_name = 11;
+  string created_at = 12;
+}
+
+// ─── Create ─────────────────────────────────────────────────
+
+message CreatePurchaseOrderLineInput {
+  int32 sequence = 1;
+  optional string product_id = 2;
+  string name = 3;
+  double product_qty = 4;
+  double price_unit = 5;
+  double discount = 6;
+  optional string display_type = 7;
+  optional string date_planned = 8;
+  optional string product_uom_id = 9;
+}
+
+message CreatePurchaseOrderRequest {
+  string tenant_id = 1;
+  string name = 2;
+  string partner_id = 3;
+  string currency_id = 4;
+  string date_order = 5;
+  optional string date_planned = 6;
+  optional string priority = 7;
+  optional string origin = 8;
+  optional string partner_ref = 9;
+  optional string dest_address_id = 10;
+  optional string note = 11;
+  optional string fiscal_position_id = 12;
+  optional string payment_term_id = 13;
+  optional string incoterm_id = 14;
+  optional string user_id = 15;
+  bool receipt_reminder_email = 16;
+  optional int32 reminder_date_before_receipt = 17;
+  repeated CreatePurchaseOrderLineInput lines = 18;
+}
+
+message CreatePurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}
+
+// ─── Update ─────────────────────────────────────────────────
+
+message UpdatePurchaseOrderLineInput {
+  optional string id = 1;
+  int32 sequence = 2;
+  optional string product_id = 3;
+  string name = 4;
+  double product_qty = 5;
+  double price_unit = 6;
+  double discount = 7;
+  optional string display_type = 8;
+  optional string date_planned = 9;
+  optional string product_uom_id = 10;
+}
+
+message UpdatePurchaseOrderRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string partner_id = 3;
+  optional string currency_id = 4;
+  optional string date_order = 5;
+  optional string date_planned = 6;
+  optional string priority = 7;
+  optional string origin = 8;
+  optional string partner_ref = 9;
+  optional string dest_address_id = 10;
+  optional string note = 11;
+  optional string fiscal_position_id = 12;
+  optional string payment_term_id = 13;
+  optional string incoterm_id = 14;
+  optional string user_id = 15;
+  optional bool receipt_reminder_email = 16;
+  optional int32 reminder_date_before_receipt = 17;
+  repeated UpdatePurchaseOrderLineInput lines = 18;
+  int32 version = 19;
+}
+
+message UpdatePurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}
+
+// ─── Delete ─────────────────────────────────────────────────
+
+message DeletePurchaseOrderRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeletePurchaseOrderResponse {
+  bool success = 1;
+}
+
+// ─── Get ────────────────────────────────────────────────────
+
+message GetPurchaseOrderRequest {
+  string id = 1;
+}
+
+message GetPurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}
+
+// ─── List ───────────────────────────────────────────────────
+
+message ListPurchaseOrdersRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string state = 3;
+  optional string partner_id = 4;
+  optional string user_id = 5;
+  optional string date_from = 6;
+  optional string date_to = 7;
+  optional bool active = 8;
+  optional int64 limit = 9;
+  optional int64 offset = 10;
+}
+
+message ListPurchaseOrdersResponse {
+  repeated PurchaseOrderSummary orders = 1;
+  int32 total_count = 2;
+}
+
+// ─── Search ─────────────────────────────────────────────────
+
+message SearchPurchaseOrdersRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int64 limit = 3;
+}
+
+message SearchPurchaseOrdersResponse {
+  repeated PurchaseOrderSummary orders = 1;
+}
+
+// ─── Confirm ────────────────────────────────────────────────
+
+message ConfirmPurchaseOrderRequest {
+  string order_id = 1;
+}
+
+message ConfirmPurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}
+
+// ─── Cancel ─────────────────────────────────────────────────
+
+message CancelPurchaseOrderRequest {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message CancelPurchaseOrderResponse {
+  PurchaseOrder order = 1;
+}

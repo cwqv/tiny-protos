@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package tiny.v1.um;
+
+import "google/protobuf/timestamp.proto";
+import "tiny/v1/sys/common.proto";
+
+// ============ UserService ============
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc GetUsersPaged(GetUsersPagedRequest) returns (GetUsersPagedResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (tiny.v1.sys.Empty);
+  rpc BatchDeleteUsers(BatchDeleteUsersRequest) returns (BatchDeleteUsersResponse);
+}
+
+// ============ User Entity ============
+
+message User {
+  string id = 1;  // 用户 ID
+  string email = 2;  // 邮箱
+  string encrypted_password = 3;  // 加密密码
+  string display_name = 4;  // 显示名称
+  string avatar_url = 5;  // 头像URL
+  string phone = 6;  // 电话
+  repeated string roles = 7;  // 角色列表
+  bool is_active = 8;  // 是否激活
+  bool is_locked = 9;  // 是否锁定
+  string locked_at = 10;  // 锁定时间
+  string raw_user_meta_data = 11;  // 用户元数据
+  string created_at = 12;  // 创建时间
+  string updated_at = 13;  // 更新时间
+  string last_login_at = 14;  // 最后登录时间
+  int32 version = 15;  // 版本号（乐观锁）
+  string tenant_id = 16;  // 租户 ID
+}
+
+// ============ GetUserRequest ============
+
+message GetUserRequest {
+  string id = 1;
+
+}
+
+// ============ GetUserResponse ============
+
+message GetUserResponse {
+  User user = 1;
+}
+
+// ============ ListUsersRequest ============
+
+message ListUsersRequest {
+  string tenant_id = 1;
+  string search_query = 2;
+  repeated string roles = 3;
+  bool is_active = 4;
+
+  // Incremental sync support (Phase 4)
+  // Unix timestamp in milliseconds; if provided, only return users updated after this time
+  int64 updated_after_ms = 10;
+}
+
+// ============ ListUsersResponse ============
+
+message ListUsersResponse {
+  repeated User users = 1;
+
+  // Event Sourcing support (Phase 5)
+  // List of user IDs that were deleted/deactivated on server
+  // Client should remove these from local cache
+  repeated string deleted_ids = 2;
+
+  // Server's current timestamp for next incremental sync
+  google.protobuf.Timestamp server_timestamp = 3;
+}
+
+// ============ GetUsersPagedRequest ============
+
+message GetUsersPagedRequest {
+  string tenant_id = 1;
+  string search_query = 2;
+  repeated string roles = 3;
+  bool is_active = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+  string sort_by = 7;
+  bool sort_ascending = 8;
+
+  // Incremental sync support (Phase 4)
+  // Unix timestamp in milliseconds; if provided, only return users updated after this time
+  int64 updated_after_ms = 10;
+}
+
+// ============ GetUsersPagedResponse ============
+
+message GetUsersPagedResponse {
+  repeated User users = 1;
+  int32 total_count = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+
+  // Event Sourcing support (Phase 5)
+  repeated string deleted_ids = 5;
+  google.protobuf.Timestamp server_timestamp = 6;
+}
+
+// ============ CreateUserRequest ============
+
+message CreateUserRequest {
+  string tenant_id = 1;
+  string email = 2;
+  string password = 3;
+  string display_name = 4;
+  string avatar_url = 5;
+  string phone = 6;
+  repeated string roles = 7;
+}
+
+// ============ CreateUserResponse ============
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+// ============ UpdateUserRequest ============
+
+message UpdateUserRequest {
+  string id = 1;
+  string tenant_id = 2;
+  string email = 3;
+  string password = 4;
+  string display_name = 5;
+  repeated string roles = 6;
+  bool is_active = 7;
+}
+
+// ============ UpdateUserResponse ============
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+// ============ DeleteUserRequest ============
+
+message DeleteUserRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+// ============ BatchDeleteUsersRequest ============
+
+message BatchDeleteUsersRequest {
+  repeated string ids = 1;
+  string tenant_id = 2;
+}
+
+// ============ BatchDeleteUsersResponse ============
+
+message BatchDeleteUsersResponse {
+  int32 deleted_count = 1;
+}

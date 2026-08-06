@@ -1,0 +1,473 @@
+syntax = "proto3";
+
+package tiny.v1.erp.project;
+
+// ============================================================
+// ERP Project Module — Project, Task, Milestone, Stages
+// ============================================================
+
+// ─── Project Service ────────────────────────────────────────
+
+service ProjectService {
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
+  rpc GetProject(GetProjectRequest) returns (GetProjectResponse);
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse);
+}
+
+// ─── Task Service ───────────────────────────────────────────
+
+service TaskService {
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse);
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse);
+  rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse);
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+  rpc ListTasksByProject(ListTasksByProjectRequest) returns (ListTasksByProjectResponse);
+}
+
+// ─── Milestone Service ──────────────────────────────────────
+
+service MilestoneService {
+  rpc CreateMilestone(CreateMilestoneRequest) returns (CreateMilestoneResponse);
+  rpc UpdateMilestone(UpdateMilestoneRequest) returns (UpdateMilestoneResponse);
+  rpc DeleteMilestone(DeleteMilestoneRequest) returns (DeleteMilestoneResponse);
+  rpc ListMilestonesByProject(ListMilestonesByProjectRequest) returns (ListMilestonesByProjectResponse);
+}
+
+// ─── Stage Services ─────────────────────────────────────────
+
+service ProjectStageService {
+  rpc ListProjectStages(ListProjectStagesRequest) returns (ListProjectStagesResponse);
+}
+
+service TaskStageService {
+  rpc ListTaskStages(ListTaskStagesRequest) returns (ListTaskStagesResponse);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Project
+// ═══════════════════════════════════════════════════════════
+
+message Project {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string description = 4;
+  bool active = 5;
+  optional int32 sequence = 6;
+
+  // Associations
+  optional string partner_id = 7;
+  optional string user_id = 8;         // Project Manager
+  optional string stage_id = 9;        // FK → ProjectStage
+
+  // Configuration
+  optional string label_tasks = 10;
+  optional int32 color = 11;
+  optional string privacy_visibility = 12;
+  optional string date_start = 13;     // ISO date
+  optional string date = 14;           // Expiration date (ISO date)
+
+  // Feature toggles
+  bool allow_task_dependencies = 15;
+  bool allow_milestones = 16;
+  bool allow_recurring_tasks = 17;
+
+  // Status
+  optional string last_update_id = 18;
+  optional string last_update_status = 19;
+  bool is_template = 20;
+
+  // Audit
+  string created_at = 21;
+  string updated_at = 22;
+  optional string created_by = 23;
+  optional string updated_by = 24;
+  int32 version = 25;
+}
+
+message ProjectSummary {
+  string id = 1;
+  string name = 2;
+  optional string partner_name = 3;
+  optional string user_name = 4;       // Project Manager name
+  optional string stage_name = 5;
+  optional string date_start = 6;
+  optional string date = 7;
+  optional int32 color = 8;
+  bool active = 9;
+  int64 task_count = 10;
+  optional string last_update_status = 11;
+}
+
+// ─── Project Requests/Responses ─────────────────────────────
+
+message CreateProjectRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional string partner_id = 4;
+  optional string user_id = 5;
+  optional string stage_id = 6;
+  optional string date_start = 7;
+  optional string date = 8;
+  optional bool allow_task_dependencies = 9;
+  optional bool allow_milestones = 10;
+  optional int32 color = 11;
+  optional string privacy_visibility = 12;
+}
+
+message CreateProjectResponse {
+  Project project = 1;
+}
+
+message UpdateProjectRequest {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string description = 4;
+  optional string partner_id = 5;
+  optional string user_id = 6;
+  optional string stage_id = 7;
+  optional string date_start = 8;
+  optional string date = 9;
+  optional bool allow_task_dependencies = 10;
+  optional bool allow_milestones = 11;
+  optional int32 color = 12;
+  optional string privacy_visibility = 13;
+  int32 version = 14;
+}
+
+message UpdateProjectResponse {
+  Project project = 1;
+}
+
+message DeleteProjectRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteProjectResponse {
+  bool success = 1;
+}
+
+message GetProjectRequest {
+  string id = 1;
+}
+
+message GetProjectResponse {
+  optional Project project = 1;
+}
+
+message ListProjectsRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional bool active = 3;
+  optional string user_id = 4;
+  optional string stage_id = 5;
+  optional string partner_id = 6;
+  optional int64 limit = 7;
+  optional int64 offset = 8;
+}
+
+message ListProjectsResponse {
+  repeated ProjectSummary projects = 1;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Task
+// ═══════════════════════════════════════════════════════════
+
+message Task {
+  string id = 1;
+  string tenant_id = 2;
+  bool active = 3;
+  string name = 4;
+  optional string description = 5;
+  string priority = 6;                 // normal, low, high, urgent
+  optional int32 sequence = 7;
+
+  // Stage & state
+  optional string stage_id = 8;        // FK → TaskStage (task_types)
+  string state = 9;                    // in_progress, done, cancelled
+
+  // Dates
+  optional string date_end = 10;
+  optional string date_assign = 11;
+  optional string date_deadline = 12;
+  optional string date_last_stage_update = 13;
+
+  // Associations
+  optional string project_id = 14;
+  optional string partner_id = 15;
+  optional string parent_id = 16;      // Sub-task hierarchy
+  optional string milestone_id = 17;
+
+  // Time tracking
+  optional double allocated_hours = 18;
+
+  // Contact info
+  optional string partner_phone = 19;
+  optional string email_from = 20;
+  optional string email_cc = 21;
+  optional int32 color = 22;
+
+  bool display_in_project = 23;
+
+  // Working time stats
+  optional double working_days_open = 24;
+  optional double working_days_close = 25;
+
+  // Recurrence
+  bool recurring_task = 26;
+  optional string recurrence_id = 27;
+  bool is_template = 28;
+
+  // Audit
+  string created_at = 29;
+  string updated_at = 30;
+  optional string created_by = 31;
+  optional string updated_by = 32;
+  int32 version = 33;
+}
+
+message TaskSummary {
+  string id = 1;
+  string name = 2;
+  optional string project_name = 3;
+  optional string stage_name = 4;
+  string state = 5;
+  string priority = 6;
+  optional string date_deadline = 7;
+  optional double allocated_hours = 8;
+  double effective_hours = 9;
+  double remaining_hours = 10;
+  optional int32 color = 11;
+  bool active = 12;
+  int32 sub_task_count = 13;
+  optional string milestone_name = 14;
+}
+
+// ─── Task Requests/Responses ────────────────────────────────
+
+message CreateTaskRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string project_id = 3;
+  optional string parent_id = 4;
+  optional string stage_id = 5;
+  optional string priority = 6;
+  optional string description = 7;
+  optional string date_deadline = 8;
+  optional double allocated_hours = 9;
+  optional string partner_id = 10;
+  optional string milestone_id = 11;
+  optional int32 color = 12;
+}
+
+message CreateTaskResponse {
+  Task task = 1;
+}
+
+message UpdateTaskRequest {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string project_id = 4;
+  optional string parent_id = 5;
+  optional string stage_id = 6;
+  optional string state = 7;
+  optional string priority = 8;
+  optional string description = 9;
+  optional string date_deadline = 10;
+  optional double allocated_hours = 11;
+  optional string partner_id = 12;
+  optional string milestone_id = 13;
+  optional int32 color = 14;
+  int32 version = 15;
+}
+
+message UpdateTaskResponse {
+  Task task = 1;
+}
+
+message DeleteTaskRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+}
+
+message GetTaskRequest {
+  string id = 1;
+}
+
+message GetTaskResponse {
+  optional Task task = 1;
+}
+
+message ListTasksRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string project_id = 3;
+  optional string stage_id = 4;
+  optional string state = 5;
+  optional string priority = 6;
+  optional bool active = 7;
+  optional bool parent_id_is_null = 8; // top-level tasks only
+  optional string milestone_id = 9;
+  optional int64 limit = 10;
+  optional int64 offset = 11;
+}
+
+message ListTasksResponse {
+  repeated TaskSummary tasks = 1;
+}
+
+message ListTasksByProjectRequest {
+  string project_id = 1;
+  optional string stage_id = 2;
+  optional string state = 3;
+  optional bool parent_id_is_null = 4;
+  optional int64 limit = 5;
+  optional int64 offset = 6;
+}
+
+message ListTasksByProjectResponse {
+  repeated TaskSummary tasks = 1;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Milestone
+// ═══════════════════════════════════════════════════════════
+
+message Milestone {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional int32 sequence = 4;
+  string project_id = 5;
+  optional string deadline = 6;        // ISO date
+  bool is_reached = 7;
+  optional string reached_date = 8;    // ISO date
+  bool active = 9;
+
+  // Audit
+  string created_at = 10;
+  string updated_at = 11;
+  optional string created_by = 12;
+  optional string updated_by = 13;
+  int32 version = 14;
+}
+
+message MilestoneWithProject {
+  Milestone milestone = 1;
+  string project_name = 2;
+  int32 task_count = 3;
+  int32 done_task_count = 4;
+}
+
+// ─── Milestone Requests/Responses ───────────────────────────
+
+message CreateMilestoneRequest {
+  string tenant_id = 1;
+  string name = 2;
+  string project_id = 3;
+  optional string deadline = 4;
+  optional int32 sequence = 5;
+}
+
+message CreateMilestoneResponse {
+  Milestone milestone = 1;
+}
+
+message UpdateMilestoneRequest {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string deadline = 4;
+  optional bool is_reached = 5;
+  optional int32 sequence = 6;
+  int32 version = 7;
+}
+
+message UpdateMilestoneResponse {
+  Milestone milestone = 1;
+}
+
+message DeleteMilestoneRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteMilestoneResponse {
+  bool success = 1;
+}
+
+message ListMilestonesByProjectRequest {
+  string project_id = 1;
+}
+
+message ListMilestonesByProjectResponse {
+  repeated MilestoneWithProject milestones = 1;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Stages
+// ═══════════════════════════════════════════════════════════
+
+message ProjectStage {
+  string id = 1;
+  string tenant_id = 2;
+  bool active = 3;
+  optional int32 sequence = 4;
+  string name = 5;
+  bool fold = 6;
+  optional int32 color = 7;
+
+  // Audit
+  string created_at = 8;
+  string updated_at = 9;
+  optional string created_by = 10;
+  optional string updated_by = 11;
+  int32 version = 12;
+}
+
+message TaskStage {
+  string id = 1;
+  bool active = 2;
+  string name = 3;
+  optional int32 sequence = 4;
+  optional int32 color = 5;
+  bool fold = 6;
+  bool auto_validation_state = 7;
+
+  // Audit
+  string created_at = 8;
+  string updated_at = 9;
+  optional string created_by = 10;
+  optional string updated_by = 11;
+  int32 version = 12;
+}
+
+// ─── Stage Requests/Responses ───────────────────────────────
+
+message ListProjectStagesRequest {
+  string tenant_id = 1;
+}
+
+message ListProjectStagesResponse {
+  repeated ProjectStage stages = 1;
+}
+
+message ListTaskStagesRequest {
+  // No tenant_id — task stages are global
+}
+
+message ListTaskStagesResponse {
+  repeated TaskStage stages = 1;
+}

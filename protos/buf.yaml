@@ -1,0 +1,30 @@
+version: v1
+name: buf.build/tiny/protos
+
+build:
+  excludes:
+    - _archive
+
+lint:
+  use:
+    - STANDARD
+  except:
+    # legacy tiny.sys.* 包无版本后缀 (config, product, sync)
+    - PACKAGE_VERSION_SUFFIX
+    # --- 以下为 pre-existing proto 技术债，Phase 0 忠实迁移暂不修复 ---
+    # legacy ProductStatus_* enum 值命名不符合 UPPER_SNAKE_CASE + 前缀规范
+    - ENUM_VALUE_PREFIX
+    - ENUM_VALUE_UPPER_SNAKE_CASE
+    # legacy product.proto / auth.proto 有 unused import
+    - IMPORT_USED
+    # um.proto 包名 tiny.v1.um 但位于 tiny/v1/sys/ 目录
+    - PACKAGE_DIRECTORY_MATCH
+    - DIRECTORY_SAME_PACKAGE
+    # legacy RPC response 用 Empty / TaskDTO 而非 XxxResponse
+    - RPC_RESPONSE_STANDARD_NAME
+    # legacy Empty 被多个 RPC 复用
+    - RPC_REQUEST_RESPONSE_UNIQUE
+
+breaking:
+  use:
+    - FILE

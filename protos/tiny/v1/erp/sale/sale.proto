@@ -1,0 +1,273 @@
+syntax = "proto3";
+
+package tiny.v1.erp.sale;
+
+// ============================================================
+// ERP Sale Module — SaleOrder + SaleOrderLine
+// ============================================================
+
+// ─── SaleOrder Service ──────────────────────────────────────
+
+service SaleOrderService {
+  rpc CreateSaleOrder(CreateSaleOrderRequest) returns (CreateSaleOrderResponse);
+  rpc UpdateSaleOrder(UpdateSaleOrderRequest) returns (UpdateSaleOrderResponse);
+  rpc DeleteSaleOrder(DeleteSaleOrderRequest) returns (DeleteSaleOrderResponse);
+  rpc GetSaleOrder(GetSaleOrderRequest) returns (GetSaleOrderResponse);
+  rpc ListSaleOrders(ListSaleOrdersRequest) returns (ListSaleOrdersResponse);
+  rpc SearchSaleOrders(SearchSaleOrdersRequest) returns (SearchSaleOrdersResponse);
+  rpc ConfirmSaleOrder(ConfirmSaleOrderRequest) returns (ConfirmSaleOrderResponse);
+  rpc CancelSaleOrder(CancelSaleOrderRequest) returns (CancelSaleOrderResponse);
+  rpc LockSaleOrder(LockSaleOrderRequest) returns (LockSaleOrderResponse);
+}
+
+// ─── Messages ───────────────────────────────────────────────
+
+message SaleOrder {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  string partner_id = 4;
+  string state = 5;
+  bool locked = 6;
+  optional string client_order_ref = 7;
+  optional string commitment_date = 8;    // RFC3339
+  string date_order = 9;                  // RFC3339
+  optional string origin = 10;
+  optional string reference = 11;
+  optional string validity_date = 12;     // YYYY-MM-DD (NaiveDate)
+  optional string note = 13;
+  string partner_invoice_id = 14;
+  string partner_shipping_id = 15;
+  optional string pricelist_id = 16;
+  optional string currency_id = 17;
+  optional double currency_rate = 18;
+  optional string payment_term_id = 19;
+  optional string fiscal_position_id = 20;
+  optional string journal_id = 21;
+  optional string user_id = 22;
+  optional string team_id = 23;
+  string amount_untaxed = 24;             // Decimal as string
+  string amount_tax = 25;
+  string amount_total = 26;
+  optional string invoice_status = 27;
+  bool require_signature = 28;
+  bool require_payment = 29;
+  optional double prepayment_percent = 30;
+  optional string signed_by = 31;
+  optional string signed_on = 32;         // RFC3339
+  repeated SaleOrderLine lines = 33;
+  bool active = 34;
+  string created_at = 35;
+  string updated_at = 36;
+  optional string created_by = 37;
+  optional string updated_by = 38;
+  int32 version = 39;
+}
+
+message SaleOrderLine {
+  string id = 1;
+  string tenant_id = 2;
+  string order_id = 3;
+  int32 sequence = 4;
+  optional string product_id = 5;
+  string name = 6;
+  double product_uom_qty = 7;
+  double price_unit = 8;
+  double discount = 9;
+  string price_subtotal = 10;             // Decimal as string
+  string price_tax = 11;
+  string price_total = 12;
+  double customer_lead = 13;
+  double qty_delivered = 14;
+  double qty_invoiced = 15;
+  double qty_to_invoice = 16;
+  optional string invoice_status = 17;
+  optional string display_type = 18;
+  bool is_downpayment = 19;
+  optional string state = 20;
+  bool active = 21;
+  string created_at = 22;
+  string updated_at = 23;
+  optional string created_by = 24;
+  optional string updated_by = 25;
+  int32 version = 26;
+}
+
+message SaleOrderSummary {
+  string id = 1;
+  string name = 2;
+  string partner_id = 3;
+  optional string partner_name = 4;
+  string state = 5;
+  string date_order = 6;
+  string amount_untaxed = 7;
+  string amount_total = 8;
+  optional string invoice_status = 9;
+  optional string user_name = 10;
+  string created_at = 11;
+}
+
+// ─── Create ─────────────────────────────────────────────────
+
+message CreateSaleOrderLineInput {
+  int32 sequence = 1;
+  optional string product_id = 2;
+  string name = 3;
+  double product_uom_qty = 4;
+  double price_unit = 5;
+  double discount = 6;
+  optional string display_type = 7;
+  double customer_lead = 8;
+}
+
+message CreateSaleOrderRequest {
+  string tenant_id = 1;
+  string name = 2;
+  string partner_id = 3;
+  string partner_invoice_id = 4;
+  string partner_shipping_id = 5;
+  string date_order = 6;
+  optional string validity_date = 7;
+  optional string client_order_ref = 8;
+  optional string commitment_date = 9;
+  optional string origin = 10;
+  optional string note = 11;
+  optional string pricelist_id = 12;
+  optional string currency_id = 13;
+  optional string payment_term_id = 14;
+  optional string fiscal_position_id = 15;
+  optional string user_id = 16;
+  optional string team_id = 17;
+  bool require_signature = 18;
+  bool require_payment = 19;
+  repeated CreateSaleOrderLineInput lines = 20;
+}
+
+message CreateSaleOrderResponse {
+  SaleOrder order = 1;
+}
+
+// ─── Update ─────────────────────────────────────────────────
+
+message UpdateSaleOrderLineInput {
+  optional string id = 1;
+  int32 sequence = 2;
+  optional string product_id = 3;
+  string name = 4;
+  double product_uom_qty = 5;
+  double price_unit = 6;
+  double discount = 7;
+  optional string display_type = 8;
+  double customer_lead = 9;
+}
+
+message UpdateSaleOrderRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string partner_id = 3;
+  optional string partner_invoice_id = 4;
+  optional string partner_shipping_id = 5;
+  optional string date_order = 6;
+  optional string validity_date = 7;
+  optional string client_order_ref = 8;
+  optional string commitment_date = 9;
+  optional string origin = 10;
+  optional string note = 11;
+  optional string pricelist_id = 12;
+  optional string currency_id = 13;
+  optional string payment_term_id = 14;
+  optional string fiscal_position_id = 15;
+  optional string user_id = 16;
+  optional string team_id = 17;
+  repeated UpdateSaleOrderLineInput lines = 18;
+  int32 version = 19;
+}
+
+message UpdateSaleOrderResponse {
+  SaleOrder order = 1;
+}
+
+// ─── Delete ─────────────────────────────────────────────────
+
+message DeleteSaleOrderRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteSaleOrderResponse {
+  bool success = 1;
+}
+
+// ─── Get ────────────────────────────────────────────────────
+
+message GetSaleOrderRequest {
+  string id = 1;
+}
+
+message GetSaleOrderResponse {
+  SaleOrder order = 1;
+}
+
+// ─── List ───────────────────────────────────────────────────
+
+message ListSaleOrdersRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string state = 3;
+  optional string partner_id = 4;
+  optional string user_id = 5;
+  optional string team_id = 6;
+  optional string date_from = 7;
+  optional string date_to = 8;
+  optional bool active = 9;
+  optional int64 limit = 10;
+  optional int64 offset = 11;
+}
+
+message ListSaleOrdersResponse {
+  repeated SaleOrderSummary orders = 1;
+  int32 total_count = 2;
+}
+
+// ─── Search ─────────────────────────────────────────────────
+
+message SearchSaleOrdersRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int64 limit = 3;
+}
+
+message SearchSaleOrdersResponse {
+  repeated SaleOrderSummary orders = 1;
+}
+
+// ─── Confirm ────────────────────────────────────────────────
+
+message ConfirmSaleOrderRequest {
+  string order_id = 1;
+}
+
+message ConfirmSaleOrderResponse {
+  SaleOrder order = 1;
+}
+
+// ─── Cancel ─────────────────────────────────────────────────
+
+message CancelSaleOrderRequest {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message CancelSaleOrderResponse {
+  SaleOrder order = 1;
+}
+
+// ─── Lock ───────────────────────────────────────────────────
+
+message LockSaleOrderRequest {
+  string order_id = 1;
+}
+
+message LockSaleOrderResponse {
+  SaleOrder order = 1;
+}

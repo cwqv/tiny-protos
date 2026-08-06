@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package tiny.sys.config;
+
+// 配置项消息
+message ConfigItem {
+  string config_id = 1;           // 配置项唯一标识
+  string config_module = 2;        // 配置模块（如 helix.editor）
+  string config_key = 3;           // 配置键（如 deduplicate_links）
+  string config_value = 4;        // 配置值（JSON 格式字符串）
+  string config_type = 5;         // 配置类型（bool, int, string, array, object）
+  optional string default_value = 6; // 默认值（用于重置）
+  bool is_synced = 7;             // 是否已同步到云端
+  string created_at = 8;          // 创建时间（RFC3339）
+  string updated_at = 9;          // 更新时间（RFC3339）
+}
+
+// 配置列表响应
+message ConfigListResponse {
+  repeated ConfigItem items = 1;
+}
+
+// 配置变更事件
+message ConfigChangeEvent {
+  string module = 1;              // 配置模块
+  string key = 2;                 // 配置键
+  optional string old_value = 3;   // 旧值
+  string new_value = 4;           // 新值
+  string timestamp = 5;            // 时间戳（RFC3339）
+}
+
+// 更新配置请求
+message UpdateConfigRequest {
+  string module = 1;              // 配置模块
+  string key = 2;                 // 配置键
+  string value = 3;               // 配置值（JSON 格式字符串）
+}
+
+// 批量更新配置请求
+message BatchUpdateConfigRequest {
+  repeated UpdateConfigRequest updates = 1;
+}
+
+// 获取配置请求
+message GetConfigRequest {
+  string module = 1;              // 配置模块
+  string key = 2;                 // 配置键
+}
+
+// 获取模块配置请求
+message GetModuleConfigsRequest {
+  string module = 1;              // 配置模块
+}

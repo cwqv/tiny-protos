@@ -1,0 +1,315 @@
+syntax = "proto3";
+
+package tiny.v1.erp.account;
+
+// ============================================================
+// ERP Account Module — AccountMove (Journal Entry / Invoice)
+// ============================================================
+
+// ─── AccountMove Service ────────────────────────────────────
+
+service AccountMoveService {
+  rpc CreateAccountMove(CreateAccountMoveRequest) returns (CreateAccountMoveResponse);
+  rpc UpdateAccountMove(UpdateAccountMoveRequest) returns (UpdateAccountMoveResponse);
+  rpc DeleteAccountMove(DeleteAccountMoveRequest) returns (DeleteAccountMoveResponse);
+  rpc GetAccountMove(GetAccountMoveRequest) returns (GetAccountMoveResponse);
+  rpc ListAccountMoves(ListAccountMovesRequest) returns (ListAccountMovesResponse);
+  rpc SearchAccountMoves(SearchAccountMovesRequest) returns (SearchAccountMovesResponse);
+  rpc PostAccountMove(PostAccountMoveRequest) returns (PostAccountMoveResponse);
+  rpc CancelAccountMove(CancelAccountMoveRequest) returns (CancelAccountMoveResponse);
+  rpc RegisterPayment(RegisterPaymentRequest) returns (RegisterPaymentResponse);
+}
+
+// ─── Messages ───────────────────────────────────────────────
+
+message AccountMove {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string ref = 4;
+  string date = 5;                          // NaiveDate YYYY-MM-DD
+  string state = 6;
+  string move_type = 7;
+  string journal_id = 8;
+  optional string journal_group_id = 9;
+  optional string partner_id = 10;
+  optional string commercial_partner_id = 11;
+  optional string partner_shipping_id = 12;
+  optional string partner_bank_id = 13;
+  optional string fiscal_position_id = 14;
+  string currency_id = 15;
+  optional double invoice_currency_rate = 16;
+  // ─── Amounts (Decimal as string) ──────────────────
+  string amount_untaxed = 17;
+  string amount_tax = 18;
+  string amount_total = 19;
+  string amount_residual = 20;
+  string amount_untaxed_signed = 21;
+  string amount_tax_signed = 22;
+  string amount_total_signed = 23;
+  string amount_residual_signed = 24;
+  optional string payment_state = 25;
+  // ─── Invoice specific ─────────────────────────────
+  optional string invoice_date = 26;
+  optional string invoice_date_due = 27;
+  optional string delivery_date = 28;
+  optional string invoice_payment_term_id = 29;
+  optional string invoice_user_id = 30;
+  optional string invoice_origin = 31;
+  optional string payment_reference = 32;
+  optional string narration = 33;
+  // ─── Reversal ─────────────────────────────────────
+  optional string reversed_entry_id = 34;
+  optional string invoice_vendor_bill_id = 35;
+  // ─── Flags ────────────────────────────────────────
+  bool posted_before = 36;
+  bool is_move_sent = 37;
+  bool is_manually_modified = 38;
+  bool always_tax_exigible = 39;
+  // ─── Lines ────────────────────────────────────────
+  repeated AccountMoveLine lines = 40;
+  // ─── Common ───────────────────────────────────────
+  bool active = 41;
+  string created_at = 42;
+  string updated_at = 43;
+  optional string created_by = 44;
+  optional string updated_by = 45;
+  int32 version = 46;
+}
+
+message AccountMoveLine {
+  string id = 1;
+  string tenant_id = 2;
+  string move_id = 3;
+  optional string account_id = 4;
+  optional string name = 5;
+  string debit = 6;                         // Decimal as string
+  string credit = 7;
+  string balance = 8;
+  optional string amount_currency = 9;
+  string currency_id = 10;
+  optional string partner_id = 11;
+  optional string product_id = 12;
+  optional string product_uom_id = 13;
+  optional double quantity = 14;
+  optional double price_unit = 15;
+  optional string price_subtotal = 16;
+  optional string price_total = 17;
+  optional double discount = 18;
+  optional string display_type = 19;
+  optional int32 sequence = 20;
+  optional string date_maturity = 21;
+  // ─── Tax ──────────────────────────────────────────
+  optional string tax_line_id = 22;
+  optional string tax_group_id = 23;
+  optional string tax_base_amount = 24;
+  // ─── Reconciliation ───────────────────────────────
+  optional string amount_residual = 25;
+  bool reconciled = 26;
+  optional string matching_number = 27;
+  // ─── Common ───────────────────────────────────────
+  bool active = 28;
+  string created_at = 29;
+  string updated_at = 30;
+  optional string created_by = 31;
+  optional string updated_by = 32;
+  int32 version = 33;
+}
+
+message AccountMoveSummary {
+  string id = 1;
+  optional string name = 2;
+  optional string ref = 3;
+  string move_type = 4;
+  string state = 5;
+  optional string partner_id = 6;
+  optional string partner_name = 7;
+  string date = 8;
+  optional string invoice_date = 9;
+  optional string invoice_date_due = 10;
+  string amount_untaxed = 11;
+  string amount_total = 12;
+  string amount_residual = 13;
+  optional string payment_state = 14;
+  optional string journal_name = 15;
+  string created_at = 16;
+}
+
+// ─── Create ─────────────────────────────────────────────────
+
+message CreateAccountMoveLineInput {
+  optional string account_id = 1;
+  optional string name = 2;
+  string debit = 3;
+  string credit = 4;
+  string currency_id = 5;
+  optional string partner_id = 6;
+  optional string product_id = 7;
+  optional string product_uom_id = 8;
+  optional double quantity = 9;
+  optional double price_unit = 10;
+  optional double discount = 11;
+  optional string date_maturity = 12;
+  optional string display_type = 13;
+  optional int32 sequence = 14;
+  optional string tax_line_id = 15;
+  optional string tax_group_id = 16;
+  optional string tax_base_amount = 17;
+}
+
+message CreateAccountMoveRequest {
+  string tenant_id = 1;
+  string move_type = 2;
+  string journal_id = 3;
+  string currency_id = 4;
+  string date = 5;                          // YYYY-MM-DD
+  optional string ref = 6;
+  optional string partner_id = 7;
+  optional string invoice_date = 8;
+  optional string invoice_date_due = 9;
+  optional string invoice_payment_term_id = 10;
+  optional string fiscal_position_id = 11;
+  optional string invoice_user_id = 12;
+  optional string invoice_origin = 13;
+  optional string narration = 14;
+  optional string payment_reference = 15;
+  optional string partner_bank_id = 16;
+  repeated CreateAccountMoveLineInput lines = 17;
+}
+
+message CreateAccountMoveResponse {
+  AccountMove move = 1;
+}
+
+// ─── Update ─────────────────────────────────────────────────
+
+message UpdateAccountMoveLineInput {
+  optional string id = 1;
+  optional string account_id = 2;
+  optional string name = 3;
+  string debit = 4;
+  string credit = 5;
+  string currency_id = 6;
+  optional string partner_id = 7;
+  optional string product_id = 8;
+  optional string product_uom_id = 9;
+  optional double quantity = 10;
+  optional double price_unit = 11;
+  optional double discount = 12;
+  optional string date_maturity = 13;
+  optional string display_type = 14;
+  optional int32 sequence = 15;
+  optional string tax_line_id = 16;
+  optional string tax_group_id = 17;
+  optional string tax_base_amount = 18;
+}
+
+message UpdateAccountMoveRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string ref = 3;
+  optional string date = 4;
+  optional string partner_id = 5;
+  optional string invoice_date = 6;
+  optional string invoice_date_due = 7;
+  optional string invoice_payment_term_id = 8;
+  optional string fiscal_position_id = 9;
+  optional string invoice_user_id = 10;
+  optional string invoice_origin = 11;
+  optional string narration = 12;
+  optional string payment_reference = 13;
+  optional string partner_bank_id = 14;
+  repeated UpdateAccountMoveLineInput lines = 15;
+  int32 version = 16;
+}
+
+message UpdateAccountMoveResponse {
+  AccountMove move = 1;
+}
+
+// ─── Delete ─────────────────────────────────────────────────
+
+message DeleteAccountMoveRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteAccountMoveResponse {
+  bool success = 1;
+}
+
+// ─── Get ────────────────────────────────────────────────────
+
+message GetAccountMoveRequest {
+  string id = 1;
+}
+
+message GetAccountMoveResponse {
+  AccountMove move = 1;
+}
+
+// ─── List ───────────────────────────────────────────────────
+
+message ListAccountMovesRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string state = 3;
+  optional string move_type = 4;
+  optional string partner_id = 5;
+  optional string journal_id = 6;
+  optional string date_from = 7;
+  optional string date_to = 8;
+  optional string payment_state = 9;
+  optional bool active = 10;
+  optional int64 limit = 11;
+  optional int64 offset = 12;
+}
+
+message ListAccountMovesResponse {
+  repeated AccountMoveSummary moves = 1;
+  int32 total_count = 2;
+}
+
+// ─── Search ─────────────────────────────────────────────────
+
+message SearchAccountMovesRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int64 limit = 3;
+}
+
+message SearchAccountMovesResponse {
+  repeated AccountMoveSummary moves = 1;
+}
+
+// ─── Post (Confirm) ─────────────────────────────────────────
+
+message PostAccountMoveRequest {
+  string move_id = 1;
+}
+
+message PostAccountMoveResponse {
+  AccountMove move = 1;
+}
+
+// ─── Cancel ─────────────────────────────────────────────────
+
+message CancelAccountMoveRequest {
+  string move_id = 1;
+  string reason = 2;
+}
+
+message CancelAccountMoveResponse {
+  AccountMove move = 1;
+}
+
+// ─── Register Payment ───────────────────────────────────────
+
+message RegisterPaymentRequest {
+  string move_id = 1;
+  string amount = 2;                        // Decimal as string
+}
+
+message RegisterPaymentResponse {
+  AccountMove move = 1;
+}

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package tiny.sys.sync.v1;
+
+option go_package = "github.com/tiny/tiny/sys/sync/v1;syncv1";
+
+service SyncService {
+  // Sync tasks
+  rpc SyncTasks(SyncTasksRequest) returns (SyncTasksResponse);
+}
+
+message SyncTasksRequest {
+  string entity_type = 1;
+  repeated SyncOperation operations = 2;
+}
+
+message SyncOperation {
+  string entity_uuid = 1;
+  string operation = 2; // "create", "update", "delete"
+  string payload = 3;   // JSON string
+  int64 created_at = 4;
+}
+
+message SyncTasksResponse {
+  bool success = 1;
+  string message = 2;
+  repeated string processed_uuids = 3;
+}

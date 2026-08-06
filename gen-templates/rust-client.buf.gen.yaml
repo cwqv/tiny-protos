@@ -1,0 +1,24 @@
+# Rust 客户端生成模板 — 供 tiny-client-gpui 使用
+# 生成: prost messages + tonic client stubs (无 server trait)
+#
+# 注意: gpui 仓实际使用 tonic-build build-time 生成 (见 crates/client-proto/build.rs)，
+#       此模板仅供手动 / CI 离线生成参考。
+#
+# 用法 (在消费方仓内):
+#   cp ../tiny-protos/gen-templates/rust-client.buf.gen.yaml ../tiny-protos/protos/buf.gen.yaml
+#   cd ../tiny-protos/protos && buf generate
+version: v1
+plugins:
+  - plugin: buf.build/community/neoeinstein-prost
+    out: ../../tiny-client-gpui/crates/client-proto/src/generated
+    opt:
+      - compile_well_known_types
+      - extern_path=.google.protobuf=::pbjson_types
+
+  - plugin: buf.build/community/neoeinstein-tonic
+    out: ../../tiny-client-gpui/crates/client-proto/src/generated
+    opt:
+      - compile_well_known_types
+      - extern_path=.google.protobuf=::pbjson_types
+      # gpui 仓只消费 client stubs，不需要 server trait
+      - no_server=true

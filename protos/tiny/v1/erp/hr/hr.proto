@@ -1,0 +1,405 @@
+syntax = "proto3";
+
+package tiny.v1.erp.hr;
+
+// ============================================================
+// ERP HR Module — Employee, Department, Job
+// ============================================================
+
+// ─── Employee Service ───────────────────────────────────────
+
+service EmployeeService {
+  rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse);
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (UpdateEmployeeResponse);
+  rpc DeleteEmployee(DeleteEmployeeRequest) returns (DeleteEmployeeResponse);
+  rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse);
+  rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse);
+  rpc GetOrgChart(GetOrgChartRequest) returns (GetOrgChartResponse);
+}
+
+// ─── Department Service ─────────────────────────────────────
+
+service DepartmentService {
+  rpc CreateDepartment(CreateDepartmentRequest) returns (CreateDepartmentResponse);
+  rpc UpdateDepartment(UpdateDepartmentRequest) returns (UpdateDepartmentResponse);
+  rpc DeleteDepartment(DeleteDepartmentRequest) returns (DeleteDepartmentResponse);
+  rpc GetDepartment(GetDepartmentRequest) returns (GetDepartmentResponse);
+  rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse);
+  rpc GetDepartmentTree(GetDepartmentTreeRequest) returns (GetDepartmentTreeResponse);
+}
+
+// ─── Job Service ────────────────────────────────────────────
+
+service JobService {
+  rpc CreateJob(CreateJobRequest) returns (CreateJobResponse);
+  rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse);
+  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
+  rpc GetJob(GetJobRequest) returns (GetJobResponse);
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Employee
+// ═══════════════════════════════════════════════════════════
+
+message Employee {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  bool active = 4;
+  string employee_type = 5;
+  optional int32 color = 6;
+  // work info
+  optional string job_id = 7;
+  optional string department_id = 8;
+  optional string parent_id = 9;
+  optional string coach_id = 10;
+  optional string work_phone = 11;
+  optional string mobile_phone = 12;
+  optional string work_email = 13;
+  optional string work_contact_id = 14;
+  optional string work_location_type = 15;
+  // user
+  optional string user_id = 16;
+  optional string resource_id = 17;
+  // identity
+  optional string barcode = 18;
+  optional string pin = 19;
+  // private
+  optional string legal_name = 20;
+  optional string private_phone = 21;
+  optional string private_email = 22;
+  optional string lang = 23;
+  optional string country_of_birth = 24;
+  optional string birthday = 25;              // ISO date
+  bool birthday_public_display = 26;
+  optional string place_of_birth = 27;
+  // docs
+  optional string permit_no = 28;
+  optional string visa_no = 29;
+  optional string visa_expire = 30;           // ISO date
+  optional string work_permit_expiration_date = 31;
+  optional string certificate = 32;
+  optional string study_field = 33;
+  optional string study_school = 34;
+  // emergency
+  optional string emergency_contact = 35;
+  optional string emergency_phone = 36;
+  // audit
+  string created_at = 37;
+  string updated_at = 38;
+  optional string created_by = 39;
+  optional string updated_by = 40;
+  int32 version = 41;
+}
+
+message EmployeeSummary {
+  string id = 1;
+  string name = 2;
+  bool active = 3;
+  string employee_type = 4;
+  optional string department_id = 5;
+  optional string department_name = 6;
+  optional string job_id = 7;
+  optional string job_name = 8;
+  optional string parent_id = 9;
+  optional string parent_name = 10;
+  optional string work_email = 11;
+  optional string work_phone = 12;
+  optional string barcode = 13;
+  string created_at = 14;
+}
+
+// ─── Employee Requests/Responses ────────────────────────────
+
+message CreateEmployeeRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string employee_type = 3;
+  optional string job_id = 4;
+  optional string department_id = 5;
+  optional string parent_id = 6;
+  optional string coach_id = 7;
+  optional string work_phone = 8;
+  optional string mobile_phone = 9;
+  optional string work_email = 10;
+  optional string barcode = 11;
+  optional string pin = 12;
+}
+
+message CreateEmployeeResponse {
+  Employee employee = 1;
+}
+
+message UpdateEmployeeRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string employee_type = 4;
+  optional string job_id = 5;
+  optional string department_id = 6;
+  optional string parent_id = 7;
+  optional string coach_id = 8;
+  optional string work_phone = 9;
+  optional string mobile_phone = 10;
+  optional string work_email = 11;
+  optional string work_location_type = 12;
+  optional string barcode = 13;
+  optional string pin = 14;
+  optional string private_phone = 15;
+  optional string private_email = 16;
+  optional string birthday = 17;
+  optional string place_of_birth = 18;
+  optional string emergency_contact = 19;
+  optional string emergency_phone = 20;
+  optional string certificate = 21;
+  optional string study_field = 22;
+  optional string study_school = 23;
+  int32 version = 24;
+}
+
+message UpdateEmployeeResponse {
+  Employee employee = 1;
+}
+
+message DeleteEmployeeRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteEmployeeResponse {
+  bool success = 1;
+}
+
+message GetEmployeeRequest {
+  string id = 1;
+}
+
+message GetEmployeeResponse {
+  optional Employee employee = 1;
+}
+
+message ListEmployeesRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string department_id = 3;
+  optional string job_id = 4;
+  optional string employee_type = 5;
+  optional bool active = 6;
+  optional int64 limit = 7;
+  optional int64 offset = 8;
+}
+
+message ListEmployeesResponse {
+  repeated EmployeeSummary employees = 1;
+}
+
+message GetOrgChartRequest {
+  string tenant_id = 1;
+  string employee_id = 2;
+}
+
+message GetOrgChartResponse {
+  repeated EmployeeSummary direct_reports = 1;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Department
+// ═══════════════════════════════════════════════════════════
+
+message Department {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  string complete_name = 4;
+  bool active = 5;
+  optional string parent_id = 6;
+  optional string manager_id = 7;
+  optional int32 color = 8;
+  optional string note = 9;
+  optional string parent_path = 10;
+  optional string master_department_id = 11;
+  string created_at = 12;
+  string updated_at = 13;
+  optional string created_by = 14;
+  optional string updated_by = 15;
+  int32 version = 16;
+}
+
+message DepartmentSummary {
+  string id = 1;
+  string name = 2;
+  string complete_name = 3;
+  bool active = 4;
+  optional string parent_id = 5;
+  optional string manager_id = 6;
+  optional string manager_name = 7;
+  int64 employee_count = 8;
+  string created_at = 9;
+}
+
+message DepartmentTreeNode {
+  string id = 1;
+  string name = 2;
+  string complete_name = 3;
+  optional string manager_id = 4;
+  optional string manager_name = 5;
+  repeated DepartmentTreeNode children = 6;
+}
+
+// ─── Department Requests/Responses ──────────────────────────
+
+message CreateDepartmentRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string parent_id = 3;
+  optional string manager_id = 4;
+  optional string note = 5;
+  optional int32 color = 6;
+}
+
+message CreateDepartmentResponse {
+  Department department = 1;
+}
+
+message UpdateDepartmentRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string parent_id = 4;
+  optional string manager_id = 5;
+  optional string note = 6;
+  optional int32 color = 7;
+  int32 version = 8;
+}
+
+message UpdateDepartmentResponse {
+  Department department = 1;
+}
+
+message DeleteDepartmentRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteDepartmentResponse {
+  bool success = 1;
+}
+
+message GetDepartmentRequest {
+  string id = 1;
+}
+
+message GetDepartmentResponse {
+  optional Department department = 1;
+}
+
+message ListDepartmentsRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string parent_id = 3;
+  optional bool active = 4;
+  optional int64 limit = 5;
+  optional int64 offset = 6;
+}
+
+message ListDepartmentsResponse {
+  repeated DepartmentSummary departments = 1;
+}
+
+message GetDepartmentTreeRequest {
+  string tenant_id = 1;
+}
+
+message GetDepartmentTreeResponse {
+  repeated DepartmentTreeNode roots = 1;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Messages — Job
+// ═══════════════════════════════════════════════════════════
+
+message Job {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  bool active = 4;
+  optional string department_id = 5;
+  optional int32 sequence = 6;
+  optional int32 no_of_recruitment = 7;
+  optional string description = 8;
+  optional string requirements = 9;
+  optional string user_id = 10;
+  optional string contract_type_id = 11;
+  string created_at = 12;
+  string updated_at = 13;
+  optional string created_by = 14;
+  optional string updated_by = 15;
+  int32 version = 16;
+}
+
+message JobWithCount {
+  Job job = 1;
+  int32 no_of_employee = 2;
+  optional string department_name = 3;
+}
+
+// ─── Job Requests/Responses ─────────────────────────────────
+
+message CreateJobRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string department_id = 3;
+  optional string description = 4;
+  optional string requirements = 5;
+  optional int32 no_of_recruitment = 6;
+}
+
+message CreateJobResponse {
+  Job job = 1;
+}
+
+message UpdateJobRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string department_id = 4;
+  optional string description = 5;
+  optional string requirements = 6;
+  optional int32 no_of_recruitment = 7;
+  int32 version = 8;
+}
+
+message UpdateJobResponse {
+  Job job = 1;
+}
+
+message DeleteJobRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteJobResponse {
+  bool success = 1;
+}
+
+message GetJobRequest {
+  string id = 1;
+}
+
+message GetJobResponse {
+  optional Job job = 1;
+}
+
+message ListJobsRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string department_id = 3;
+  optional bool active = 4;
+  optional int64 limit = 5;
+  optional int64 offset = 6;
+}
+
+message ListJobsResponse {
+  repeated JobWithCount jobs = 1;
+}

@@ -1,0 +1,300 @@
+syntax = "proto3";
+
+package tiny.v1.erp.product;
+
+import "google/protobuf/timestamp.proto";
+
+// ─── ProductTemplate Service ────────────────────────────────
+
+service ProductTemplateService {
+  rpc CreateProductTemplate(CreateProductTemplateRequest) returns (CreateProductTemplateResponse);
+  rpc UpdateProductTemplate(UpdateProductTemplateRequest) returns (UpdateProductTemplateResponse);
+  rpc DeleteProductTemplate(DeleteProductTemplateRequest) returns (DeleteProductTemplateResponse);
+  rpc GetProductTemplate(GetProductTemplateRequest) returns (GetProductTemplateResponse);
+  rpc ListProductTemplates(ListProductTemplatesRequest) returns (ListProductTemplatesResponse);
+  rpc SearchProductTemplates(SearchProductTemplatesRequest) returns (SearchProductTemplatesResponse);
+}
+
+// ─── Product (Variant) Service ──────────────────────────────
+
+service ProductService {
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc ListProductsByTemplate(ListProductsByTemplateRequest) returns (ListProductsByTemplateResponse);
+  rpc FindProductByBarcode(FindProductByBarcodeRequest) returns (FindProductByBarcodeResponse);
+}
+
+// ─── Pricelist Service ──────────────────────────────────────
+
+service PricelistService {
+  rpc GetPricelist(GetPricelistRequest) returns (GetPricelistResponse);
+  rpc ListPricelists(ListPricelistsRequest) returns (ListPricelistsResponse);
+  rpc ComputePrice(ComputePriceRequest) returns (ComputePriceResponse);
+}
+
+// ─── UoM Service ────────────────────────────────────────────
+
+service UomService {
+  rpc ListUoms(ListUomsRequest) returns (ListUomsResponse);
+  rpc ConvertUom(ConvertUomRequest) returns (ConvertUomResponse);
+}
+
+// ─── Messages: ProductTemplate ──────────────────────────────
+
+message ProductTemplateProto {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  string type = 4;
+  optional string categ_id = 5;
+  optional double list_price = 6;
+  bool sale_ok = 7;
+  bool purchase_ok = 8;
+  string uom_id = 9;
+  optional string default_code = 10;
+  optional string description = 11;
+  optional string description_sale = 12;
+  optional string description_purchase = 13;
+  optional double weight = 14;
+  optional double volume = 15;
+  bool active = 16;
+  int32 version = 17;
+  google.protobuf.Timestamp created_at = 18;
+  google.protobuf.Timestamp updated_at = 19;
+}
+
+message ProductTemplateSummaryProto {
+  string id = 1;
+  string name = 2;
+  optional string default_code = 3;
+  string type = 4;
+  optional double list_price = 5;
+  optional string categ_name = 6;
+  optional string uom_name = 7;
+  bool sale_ok = 8;
+  bool purchase_ok = 9;
+  bool active = 10;
+}
+
+message CreateProductTemplateRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string type = 3;
+  optional string categ_id = 4;
+  optional double list_price = 5;
+  optional bool sale_ok = 6;
+  optional bool purchase_ok = 7;
+  string uom_id = 8;
+  optional string default_code = 9;
+  optional string description = 10;
+  optional string description_sale = 11;
+  optional string description_purchase = 12;
+  optional double weight = 13;
+  optional double volume = 14;
+}
+
+message CreateProductTemplateResponse {
+  ProductTemplateProto template = 1;
+}
+
+message UpdateProductTemplateRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string type = 4;
+  optional string categ_id = 5;
+  optional double list_price = 6;
+  optional bool sale_ok = 7;
+  optional bool purchase_ok = 8;
+  optional string uom_id = 9;
+  optional string default_code = 10;
+  optional string description = 11;
+  optional string description_sale = 12;
+  optional string description_purchase = 13;
+  optional double weight = 14;
+  optional double volume = 15;
+  optional bool active = 16;
+  int32 version = 17;
+}
+
+message UpdateProductTemplateResponse {
+  ProductTemplateProto template = 1;
+}
+
+message DeleteProductTemplateRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteProductTemplateResponse {}
+
+message GetProductTemplateRequest {
+  string id = 1;
+}
+
+message GetProductTemplateResponse {
+  ProductTemplateProto template = 1;
+}
+
+message ListProductTemplatesRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string type = 3;
+  optional string categ_id = 4;
+  optional bool sale_ok = 5;
+  optional bool purchase_ok = 6;
+  optional bool active = 7;
+  int32 limit = 8;
+  int32 offset = 9;
+}
+
+message ListProductTemplatesResponse {
+  repeated ProductTemplateSummaryProto templates = 1;
+}
+
+message SearchProductTemplatesRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int32 limit = 3;
+}
+
+message SearchProductTemplatesResponse {
+  repeated ProductTemplateSummaryProto templates = 1;
+}
+
+// ─── Messages: Product (Variant) ────────────────────────────
+
+message ProductProto {
+  string id = 1;
+  string tenant_id = 2;
+  optional string default_code = 3;
+  bool active = 4;
+  string product_tmpl_id = 5;
+  optional string barcode = 6;
+  optional string combination_indices = 7;
+  optional double standard_price = 8;
+  optional double volume = 9;
+  optional double weight = 10;
+  bool is_favorite = 11;
+  int32 version = 12;
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message GetProductResponse {
+  ProductProto product = 1;
+}
+
+message ListProductsByTemplateRequest {
+  string tenant_id = 1;
+  string product_tmpl_id = 2;
+}
+
+message ListProductsByTemplateResponse {
+  repeated ProductProto products = 1;
+}
+
+message FindProductByBarcodeRequest {
+  string tenant_id = 1;
+  string barcode = 2;
+}
+
+message FindProductByBarcodeResponse {
+  ProductProto product = 1;
+}
+
+// ─── Messages: Pricelist ────────────────────────────────────
+
+message PricelistProto {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  bool active = 4;
+  optional int32 sequence = 5;
+  string currency_id = 6;
+  int32 version = 7;
+}
+
+message GetPricelistRequest {
+  string id = 1;
+}
+
+message GetPricelistResponse {
+  PricelistProto pricelist = 1;
+}
+
+message ListPricelistsRequest {
+  string tenant_id = 1;
+}
+
+message ListPricelistsResponse {
+  repeated PricelistProto pricelists = 1;
+}
+
+message ComputePriceRequest {
+  string pricelist_id = 1;
+  optional string product_tmpl_id = 2;
+  optional string product_id = 3;
+  double qty = 4;
+  double base_price = 5;
+}
+
+message ComputePriceResponse {
+  double computed_price = 1;
+}
+
+// ─── Messages: UoM ─────────────────────────────────────────
+
+message UomProto {
+  string id = 1;
+  string name = 2;
+  double relative_factor = 3;
+  bool active = 4;
+}
+
+message ListUomsRequest {}
+
+message ListUomsResponse {
+  repeated UomProto uoms = 1;
+}
+
+message ConvertUomRequest {
+  double qty = 1;
+  string from_uom_id = 2;
+  string to_uom_id = 3;
+}
+
+message ConvertUomResponse {
+  double result = 1;
+}
+
+// ─── Attribute (product attribute + values) ──────────────────
+
+service AttributeService {
+  rpc ListAttributes(ListAttributesRequest) returns (ListAttributesResponse);
+  rpc ListAttributeValues(ListAttributeValuesRequest) returns (ListAttributeValuesResponse);
+}
+
+message AttributeProto {
+  string id = 1;
+  string name = 2;
+  bool active = 3;
+  optional string create_variant = 4;
+  optional string display_type = 5;
+  optional int32 sequence = 6;
+}
+
+message AttributeValueProto {
+  string id = 1;
+  string name = 2;
+  string attribute_id = 3;
+  optional double default_extra_price = 4;
+  bool active = 5;
+}
+
+message ListAttributesRequest {}
+message ListAttributesResponse { repeated AttributeProto attributes = 1; }
+
+message ListAttributeValuesRequest { string attribute_id = 1; }
+message ListAttributeValuesResponse { repeated AttributeValueProto values = 1; }

@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package tiny.v1.sys;
+
+import "tiny/v1/sys/common.proto";
+import "tiny/v1/sys/um.proto";
+
+// ============ Auth Service ============
+
+// 认证服务：处理用户登录、注册、登出和令牌刷新
+service AuthService {
+  // 用户登录
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  // 用户登出
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+
+  // 刷新访问令牌
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+
+  // 用户注册
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+
+  // 获取当前用户信息（需要认证）
+  rpc GetMe(GetMeRequest) returns (GetMeResponse);
+
+  // 请求密码重置（发送重置 token，公开端点）
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (RequestPasswordResetResponse);
+
+  // 使用 token 重置密码（公开端点）
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}
+
+// ============ Login ============
+
+// 登录请求
+message LoginRequest {
+  string email = 1;              // 用户邮箱
+  string password = 2;           // 用户密码
+  optional string device_id = 3;  // 设备ID（用于多设备管理）
+}
+
+// 登录响应
+message LoginResponse {
+  string access_token = 1;       // 访问令牌
+  string refresh_token = 2;      // 刷新令牌
+  tiny.v1.um.User user = 3;                 // 用户信息 (from user.proto)
+  int64 expires_in = 4;          // 访问令牌过期时间（秒）
+}
+
+// ============ Logout ============
+
+// 登出请求
+message LogoutRequest {
+  optional string refresh_token = 1;  // 可选：指定要撤销的刷新令牌
+}
+
+// 登出响应
+message LogoutResponse {
+  bool success = 1;  // 是否成功
+}
+
+// ============ Refresh Token ============
+
+// 刷新令牌请求
+message RefreshTokenRequest {
+  string refresh_token = 1;  // 刷新令牌
+}
+
+// 刷新令牌响应
+message RefreshTokenResponse {
+  string access_token = 1;              // 新的访问令牌
+  int64 expires_in = 2;                 // 访问令牌过期时间（秒）
+  optional string refresh_token = 3;    // 轮转后的新刷新令牌
+}
+
+// ============ Register ============
+
+// 注册请求
+message RegisterRequest {
+  string email = 1;                    // 用户邮箱
+  string password = 2;                 // 用户密码
+  optional string display_name = 3;    // 显示名称
+}
+
+// 注册响应
+message RegisterResponse {
+  tiny.v1.um.User user = 1;                        // 用户信息
+  string access_token = 2;             // 访问令牌
+  string refresh_token = 3;            // 刷新令牌
+  int64 expires_in = 4;                // 访问令牌过期时间（秒）
+}
+
+// ============ Get Me ============
+
+// 获取当前用户信息请求
+message GetMeRequest {}
+
+// 获取当前用户信息响应
+message GetMeResponse {
+  tiny.v1.um.User user = 1;  // 用户信息
+}
+
+// ============ Password Reset ============
+
+// 请求密码重置请求（按 login/email 发送重置链接）
+message RequestPasswordResetRequest {
+  string tenant_id = 1;  // 租户 ID
+  string login = 2;      // 用户 login 或 email
+}
+
+// 请求密码重置响应（总是成功返回，防枚举）
+message RequestPasswordResetResponse {
+  bool sent = 1;
+}
+
+// 重置密码请求
+message ResetPasswordRequest {
+  string token = 1;       // 重置 token（邮件中携带）
+  string new_password = 2; // 新密码
+}
+
+// 重置密码响应
+message ResetPasswordResponse {
+  bool success = 1;
+}

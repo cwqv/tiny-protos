@@ -1,0 +1,18 @@
+# Dart 生成模板 — 供 tiny-client-flutter 使用
+# 生成: dart protobuf message types + dart gRPC service stubs
+#
+# 用法 (在消费方仓内):
+#   cp ../tiny-protos/gen-templates/dart.buf.gen.yaml ../tiny-protos/protos/buf.gen.yaml
+#   cd ../tiny-protos/protos && buf generate
+version: v1
+plugins:
+  # 1. dart protobuf message types
+  - plugin: buf.build/community/dart-proto
+    out: ../../tiny-client-flutter/flutter/packages/contracts/lib
+
+  # 2. dart gRPC service stubs (client + server)
+  - plugin: buf.build/community/dart-grpc
+    out: ../../tiny-client-flutter/flutter/packages/contracts/lib
+    opt:
+      - inflate
+      - include_comments

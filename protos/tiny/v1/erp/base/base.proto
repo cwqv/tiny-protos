@@ -1,0 +1,387 @@
+syntax = "proto3";
+
+package tiny.v1.erp.base;
+
+// ============================================================
+// ERP Base Module — Partner, Currency, Country, Bank, Sequence
+// ============================================================
+
+// ─── Partner ────────────────────────────────────────────────
+
+service PartnerService {
+  rpc CreatePartner(CreatePartnerRequest) returns (CreatePartnerResponse);
+  rpc UpdatePartner(UpdatePartnerRequest) returns (UpdatePartnerResponse);
+  rpc DeletePartner(DeletePartnerRequest) returns (DeletePartnerResponse);
+  rpc GetPartner(GetPartnerRequest) returns (GetPartnerResponse);
+  rpc ListPartners(ListPartnersRequest) returns (ListPartnersResponse);
+  rpc SearchPartners(SearchPartnersRequest) returns (SearchPartnersResponse);
+}
+
+message Partner {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string complete_name = 4;
+  optional string parent_id = 5;
+  optional string ref = 6;
+  optional string lang = 7;
+  optional string tz = 8;
+  optional string user_id = 9;
+  optional string vat = 10;
+  optional string company_registry = 11;
+  optional string website = 12;
+  optional string comment = 13;
+  bool active = 14;
+  bool employee = 15;
+  optional string function = 16;
+  optional string type = 17;
+  optional string street = 18;
+  optional string street2 = 19;
+  optional string zip = 20;
+  optional string city = 21;
+  optional string state_id = 22;
+  optional string country_id = 23;
+  optional double partner_latitude = 24;
+  optional double partner_longitude = 25;
+  optional string email = 26;
+  optional string phone = 27;
+  bool is_company = 28;
+  optional string industry_id = 29;
+  optional string company_type = 30;
+  optional int32 color = 31;
+  bool partner_share = 32;
+  optional string commercial_partner_id = 33;
+  optional string commercial_company_name = 34;
+  optional string company_name = 35;
+  optional string barcode = 36;
+  string created_at = 37;
+  string updated_at = 38;
+  optional string created_by = 39;
+  optional string updated_by = 40;
+  int32 version = 41;
+}
+
+message PartnerSummary {
+  string id = 1;
+  optional string name = 2;
+  optional string email = 3;
+  optional string phone = 4;
+  optional string city = 5;
+  optional string country_name = 6;
+  bool is_company = 7;
+  bool active = 8;
+}
+
+message CreatePartnerRequest {
+  string tenant_id = 1;
+  string name = 2;
+  bool is_company = 3;
+  optional string type = 4;
+  optional string parent_id = 5;
+  optional string email = 6;
+  optional string phone = 7;
+  optional string street = 8;
+  optional string street2 = 9;
+  optional string zip = 10;
+  optional string city = 11;
+  optional string state_id = 12;
+  optional string country_id = 13;
+  optional string vat = 14;
+  optional string website = 15;
+  optional string industry_id = 16;
+  optional string lang = 17;
+  optional string comment = 18;
+  optional string barcode = 19;
+  optional string operator_id = 20;
+}
+
+message UpdatePartnerRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional bool is_company = 4;
+  optional string type = 5;
+  optional string parent_id = 6;
+  optional string email = 7;
+  optional string phone = 8;
+  optional string street = 9;
+  optional string street2 = 10;
+  optional string zip = 11;
+  optional string city = 12;
+  optional string state_id = 13;
+  optional string country_id = 14;
+  optional string vat = 15;
+  optional string website = 16;
+  optional string industry_id = 17;
+  optional bool active = 18;
+  optional string comment = 19;
+  int32 version = 20;
+  optional string operator_id = 21;
+}
+
+message DeletePartnerRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message GetPartnerRequest {
+  string id = 1;
+}
+
+message ListPartnersRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional bool is_company = 3;
+  optional string country_id = 4;
+  optional string state_id = 5;
+  optional bool active = 6;
+  optional int64 limit = 7;
+  optional int64 offset = 8;
+}
+
+message SearchPartnersRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int64 limit = 3;
+}
+
+message CreatePartnerResponse {
+  Partner partner = 1;
+}
+
+message UpdatePartnerResponse {
+  Partner partner = 1;
+}
+
+message DeletePartnerResponse {
+  bool success = 1;
+}
+
+message GetPartnerResponse {
+  Partner partner = 1;
+}
+
+message ListPartnersResponse {
+  repeated PartnerSummary partners = 1;
+  int32 total_count = 2;
+}
+
+message SearchPartnersResponse {
+  repeated PartnerSummary partners = 1;
+}
+
+// ─── Currency ───────────────────────────────────────────────
+
+service CurrencyService {
+  rpc GetCurrency(GetCurrencyRequest) returns (GetCurrencyResponse);
+  rpc ListCurrencies(ListCurrenciesRequest) returns (ListCurrenciesResponse);
+  rpc GetCurrencyByCode(GetCurrencyByCodeRequest) returns (GetCurrencyByCodeResponse);
+}
+
+message Currency {
+  string id = 1;
+  string name = 2;
+  optional int32 iso_numeric = 3;
+  optional string full_name = 4;
+  string symbol = 5;
+  optional double rounding = 6;
+  optional int32 decimal_places = 7;
+  bool active = 8;
+  optional string position = 9;
+  optional string currency_unit_label = 10;
+  optional string currency_subunit_label = 11;
+  string created_at = 12;
+  string updated_at = 13;
+  int32 version = 14;
+}
+
+message GetCurrencyRequest { string id = 1; }
+message GetCurrencyByCodeRequest { string code = 1; }
+message ListCurrenciesRequest {}
+message GetCurrencyResponse { Currency currency = 1; }
+message GetCurrencyByCodeResponse { Currency currency = 1; }
+message ListCurrenciesResponse { repeated Currency currencies = 1; }
+
+// ─── Country ────────────────────────────────────────────────
+
+service CountryService {
+  rpc GetCountry(GetCountryRequest) returns (GetCountryResponse);
+  rpc ListCountries(ListCountriesRequest) returns (ListCountriesResponse);
+  rpc GetCountryByCode(GetCountryByCodeRequest) returns (GetCountryByCodeResponse);
+  rpc ListCountryStates(ListCountryStatesRequest) returns (ListCountryStatesResponse);
+}
+
+message Country {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  optional string address_format = 4;
+  optional string currency_id = 5;
+  optional int32 phone_code = 6;
+  bool state_required = 7;
+  bool zip_required = 8;
+  bool active = 9;
+  int32 version = 10;
+}
+
+message CountryState {
+  string id = 1;
+  string country_id = 2;
+  string name = 3;
+  string code = 4;
+  bool active = 5;
+  int32 version = 6;
+}
+
+message GetCountryRequest { string id = 1; }
+message GetCountryByCodeRequest { string code = 1; }
+message ListCountriesRequest {}
+message ListCountryStatesRequest { string country_id = 1; }
+message GetCountryResponse { Country country = 1; }
+message GetCountryByCodeResponse { Country country = 1; }
+message ListCountriesResponse { repeated Country countries = 1; }
+message ListCountryStatesResponse { repeated CountryState states = 1; }
+
+// ─── Bank ───────────────────────────────────────────────────
+
+service BankService {
+  rpc GetBank(GetBankRequest) returns (GetBankResponse);
+  rpc SaveBank(SaveBankRequest) returns (SaveBankResponse);
+  rpc ListBanks(ListBanksRequest) returns (ListBanksResponse);
+  rpc GetBankByBic(GetBankByBicRequest) returns (GetBankByBicResponse);
+}
+
+message Bank {
+  string id = 1;
+  string name = 2;
+  optional string street = 3;
+  optional string street2 = 4;
+  optional string zip = 5;
+  optional string city = 6;
+  optional string state = 7;
+  optional string country = 8;
+  optional string email = 9;
+  optional string phone = 10;
+  bool active = 11;
+  optional string bic = 12;
+  string created_at = 13;
+  string updated_at = 14;
+  int32 version = 15;
+}
+
+message GetBankRequest { string id = 1; }
+message GetBankByBicRequest { string bic = 1; }
+message ListBanksRequest {}
+message SaveBankRequest {
+  string name = 1;
+  optional string id = 2;
+  optional string street = 3;
+  optional string street2 = 4;
+  optional string zip = 5;
+  optional string city = 6;
+  optional string state = 7;
+  optional string country = 8;
+  optional string email = 9;
+  optional string phone = 10;
+  bool active = 11;
+  optional string bic = 12;
+  int32 version = 13;
+}
+message GetBankResponse { Bank bank = 1; }
+message SaveBankResponse { Bank bank = 1; }
+message GetBankByBicResponse { Bank bank = 1; }
+message ListBanksResponse { repeated Bank banks = 1; }
+
+// ─── Sequence ───────────────────────────────────────────────
+
+service SequenceService {
+  rpc GetSequence(GetSequenceRequest) returns (GetSequenceResponse);
+  rpc ListSequences(ListSequencesRequest) returns (ListSequencesResponse);
+  rpc NextSequenceValue(NextSequenceValueRequest) returns (NextSequenceValueResponse);
+}
+
+message Sequence {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string code = 4;
+  optional string implementation = 5;
+  bool active = 6;
+  optional string prefix = 7;
+  optional string suffix = 8;
+  int32 number_next = 9;
+  int32 number_increment = 10;
+  int32 padding = 11;
+  bool use_date_range = 12;
+  string created_at = 13;
+  string updated_at = 14;
+  int32 version = 15;
+}
+
+message GetSequenceRequest { string id = 1; }
+message ListSequencesRequest { string tenant_id = 1; }
+message NextSequenceValueRequest {
+  string tenant_id = 1;
+  string code = 2;
+}
+message GetSequenceResponse { Sequence sequence = 1; }
+message ListSequencesResponse { repeated Sequence sequences = 1; }
+message NextSequenceValueResponse { string formatted_value = 1; }
+
+// ─── Company (multi-company, res.company equivalent) ────────
+
+service CompanyService {
+  rpc CreateCompany(CreateCompanyRequest) returns (CreateCompanyResponse);
+  rpc UpdateCompany(UpdateCompanyRequest) returns (UpdateCompanyResponse);
+  rpc GetCompany(GetCompanyRequest) returns (GetCompanyResponse);
+  rpc ListCompanies(ListCompaniesRequest) returns (ListCompaniesResponse);
+  rpc ArchiveCompany(ArchiveCompanyRequest) returns (ArchiveCompanyResponse);
+}
+
+message CompanyDto {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  bool active = 4;
+  int32 sequence = 5;
+  optional string parent_id = 6;
+  optional string parent_path = 7;
+  optional string root_id = 8;
+  optional string partner_id = 9;
+  optional string currency_id = 10;
+  optional string company_registry = 11;
+  int32 version = 12;
+}
+
+message CreateCompanyRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string parent_id = 3;
+  optional string currency_id = 4;
+  optional string company_registry = 5;
+}
+message CreateCompanyResponse { CompanyDto company = 1; }
+
+message UpdateCompanyRequest {
+  string tenant_id = 1;
+  string id = 2;
+  optional string name = 3;
+  optional string currency_id = 4;
+  optional string company_registry = 5;
+}
+message UpdateCompanyResponse { CompanyDto company = 1; }
+
+message GetCompanyRequest {
+  string tenant_id = 1;
+  string id = 2;
+}
+message GetCompanyResponse { CompanyDto company = 1; }
+
+message ListCompaniesRequest { string tenant_id = 1; }
+message ListCompaniesResponse { repeated CompanyDto companies = 1; }
+
+message ArchiveCompanyRequest {
+  string tenant_id = 1;
+  string id = 2;
+}
+message ArchiveCompanyResponse { bool success = 1; }

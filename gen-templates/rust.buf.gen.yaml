@@ -1,0 +1,27 @@
+# Rust 生成模板 — 供 tiny 主仓 (server + tinyc) 使用
+# 生成: prost messages + tonic services (server trait + client) + prost-serde
+#
+# 用法 (在消费方仓内):
+#   cp ../tiny-protos/gen-templates/rust.buf.gen.yaml ../tiny-protos/protos/buf.gen.yaml
+#   # 编辑 out: 路径指向消费方的 generated/ 目录
+#   cd ../tiny-protos/protos && buf generate
+version: v1
+plugins:
+  # 1. prost: 生成所有 message types (含 well-known types 映射)
+  - plugin: buf.build/community/neoeinstein-prost
+    out: ../../tiny/core/contracts/src/generated
+    opt:
+      - compile_well_known_types
+      - extern_path=.google.protobuf=::pbjson_types
+
+  # 2. tonic: 生成 service stubs (server trait + client)
+  #    extern_path 确保 service 引用 prost 生成的 message types，不重复生成
+  - plugin: buf.build/community/neoeinstein-tonic
+    out: ../../tiny/core/contracts/src/generated
+    opt:
+      - compile_well_known_types
+      - extern_path=.google.protobuf=::pbjson_types
+
+  # 3. prost-serde: 为 message types 添加 serde 序列化 derive
+  - plugin: buf.build/community/neoeinstein-prost-serde
+    out: ../../tiny/core/contracts/src/generated

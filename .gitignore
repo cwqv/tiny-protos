@@ -1,0 +1,13 @@
+# buf generated artifacts (never commit)
+protos/buf.gen.yaml
+protos/buf.gen.*.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
