@@ -11,3 +11,8 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# 工具私有目录（IDE/agent 会话状态，不应跟踪）
+.reasonix/
+reasonix.toml
+.workbuddy/

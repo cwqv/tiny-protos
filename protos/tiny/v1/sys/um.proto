@@ -22,7 +22,11 @@ service UserService {
 message User {
   string id = 1;  // 用户 ID
   string email = 2;  // 邮箱
-  string encrypted_password = 3;  // 加密密码
+  // 字段 3 曾为 encrypted_password（加密密码哈希）。
+  // 安全修复：密码哈希不应出现在 client-facing 消息中。服务端应通过专用鉴权 RPC 处理密码。
+  // 该字段号已 reserved，禁止未来复用以传输任何凭证类字段。
+  reserved 3;
+  reserved "encrypted_password";
   string display_name = 4;  // 显示名称
   string avatar_url = 5;  // 头像URL
   string phone = 6;  // 电话
