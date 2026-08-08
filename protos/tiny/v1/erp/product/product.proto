@@ -13,6 +13,10 @@ service ProductTemplateService {
   rpc GetProductTemplate(GetProductTemplateRequest) returns (GetProductTemplateResponse);
   rpc ListProductTemplates(ListProductTemplatesRequest) returns (ListProductTemplatesResponse);
   rpc SearchProductTemplates(SearchProductTemplatesRequest) returns (SearchProductTemplatesResponse);
+  // NearTime 同步（写本地 → outbox → 后台批量推送）
+  rpc SyncProductTemplates(SyncProductTemplatesRequest) returns (SyncProductTemplatesResponse);
+  // 增量拉取 server 变更（按 per-tenant sync_version 游标）
+  rpc PullProductTemplates(PullProductTemplatesRequest) returns (PullProductTemplatesResponse);
 }
 
 // ─── Product (Variant) Service ──────────────────────────────
@@ -298,3 +302,42 @@ message ListAttributesResponse { repeated AttributeProto attributes = 1; }
 
 message ListAttributeValuesRequest { string attribute_id = 1; }
 message ListAttributeValuesResponse { repeated AttributeValueProto values = 1; }
+
+// ─── ProductTemplate NearTime Sync（镜像 PartnerService.Sync/Pull）───────
+
+message ProductTemplateOperation {
+  string operation_id = 1;   // client outbox event id
+  string entity_uuid = 2;    // product template id
+  string type = 3;           // "create" | "update" | "delete"
+  string payload_json = 4;   // ProductTemplateProto JSON；delete 时 {"id","tenant_id"}
+  int64 occurred_at = 5;
+}
+
+message SyncProductTemplatesRequest {
+  string tenant_id = 1;
+  repeated ProductTemplateOperation operations = 2;
+}
+
+message SyncProductTemplatesResponse {
+  repeated string ack_ids = 1;
+  repeated ProductTemplateSyncError errors = 2;
+}
+
+message ProductTemplateSyncError {
+  string operation_id = 1;
+  string code = 2;
+  string message = 3;
+}
+
+message PullProductTemplatesRequest {
+  string tenant_id = 1;
+  int64 last_synced_version = 2;
+  int32 batch_size = 3;
+}
+
+message PullProductTemplatesResponse {
+  repeated ProductTemplateProto updates = 1;
+  int64 new_version = 2;
+  bool has_more = 3;
+}
+

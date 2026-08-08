@@ -15,6 +15,10 @@ service PartnerService {
   rpc GetPartner(GetPartnerRequest) returns (GetPartnerResponse);
   rpc ListPartners(ListPartnersRequest) returns (ListPartnersResponse);
   rpc SearchPartners(SearchPartnersRequest) returns (SearchPartnersResponse);
+  // NearTime 同步（写本地 → outbox → 后台批量推送；镜像 TaskService.SyncTasks）
+  rpc SyncPartners(SyncPartnersRequest) returns (SyncPartnersResponse);
+  // 增量拉取 server 变更（按 per-tenant sync_version 游标）
+  rpc PullPartners(PullPartnersRequest) returns (PullPartnersResponse);
 }
 
 message Partner {
@@ -385,3 +389,42 @@ message ArchiveCompanyRequest {
   string id = 2;
 }
 message ArchiveCompanyResponse { bool success = 1; }
+
+// ─── Partner NearTime Sync（镜像 TaskService.SyncTasks/PullTasks）─────────
+
+message PartnerOperation {
+  string operation_id = 1;   // client outbox event id
+  string entity_uuid = 2;    // partner id
+  string type = 3;           // "create" | "update" | "delete"
+  string payload_json = 4;   // Partner message JSON；delete 时 {"id","tenant_id"}
+  int64 occurred_at = 5;     // client 端事件时间（epoch 秒）
+}
+
+message SyncPartnersRequest {
+  string tenant_id = 1;
+  repeated PartnerOperation operations = 2;
+}
+
+message SyncPartnersResponse {
+  repeated string ack_ids = 1;   // 成功处理的 operation_id 列表
+  repeated PartnerSyncError errors = 2;
+}
+
+message PartnerSyncError {
+  string operation_id = 1;
+  string code = 2;               // DELETE_FAILED | INVALID_PAYLOAD | SAVE_FAILED
+  string message = 3;
+}
+
+message PullPartnersRequest {
+  string tenant_id = 1;
+  int64 last_synced_version = 2; // per-tenant sync_version 游标
+  int32 batch_size = 3;
+}
+
+message PullPartnersResponse {
+  repeated Partner updates = 1;  // 自游标以来变更的 Partner
+  int64 new_version = 2;         // 本批末行的 sync_version（下轮游标）
+  bool has_more = 3;
+}
+
