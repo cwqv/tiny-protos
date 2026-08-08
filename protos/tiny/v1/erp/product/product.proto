@@ -64,6 +64,7 @@ message ProductTemplateProto {
   int32 version = 17;
   google.protobuf.Timestamp created_at = 18;
   google.protobuf.Timestamp updated_at = 19;
+  bool is_deleted = 20;
 }
 
 message ProductTemplateSummaryProto {

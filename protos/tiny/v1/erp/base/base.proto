@@ -63,6 +63,7 @@ message Partner {
   optional string created_by = 39;
   optional string updated_by = 40;
   int32 version = 41;
+  bool is_deleted = 42;
 }
 
 message PartnerSummary {
