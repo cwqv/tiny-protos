@@ -17,6 +17,8 @@ service ProductTemplateService {
   rpc SyncProductTemplates(SyncProductTemplatesRequest) returns (SyncProductTemplatesResponse);
   // 增量拉取 server 变更（按 per-tenant sync_version 游标）
   rpc PullProductTemplates(PullProductTemplatesRequest) returns (PullProductTemplatesResponse);
+  // 配置模板可配置属性并 RealTime 派生变体（原子：写 PTAL/PTAV + 重生成变体 + 返回新变体集）
+  rpc ConfigureTemplateAttributes(ConfigureTemplateAttributesRequest) returns (ConfigureTemplateAttributesResponse);
 }
 
 // ─── Product (Variant) Service ──────────────────────────────
@@ -303,6 +305,28 @@ message ListAttributesResponse { repeated AttributeProto attributes = 1; }
 
 message ListAttributeValuesRequest { string attribute_id = 1; }
 message ListAttributeValuesResponse { repeated AttributeValueProto values = 1; }
+
+// ─── Messages: Configure Template Attributes（RealTime 派生变体）───────
+
+message ProductAttributeValueConfigProto {
+  string attribute_value_id = 1;   // product.attribute_values.id
+  double price_extra = 2;
+}
+
+message ProductAttributeLineProto {
+  string attribute_id = 1;         // product.attributes.id
+  repeated ProductAttributeValueConfigProto values = 2;
+}
+
+message ConfigureTemplateAttributesRequest {
+  string tenant_id = 1;
+  string product_tmpl_id = 2;
+  repeated ProductAttributeLineProto lines = 3;  // 全量替换语义
+}
+
+message ConfigureTemplateAttributesResponse {
+  repeated ProductProto variants = 1;  // 派生后的全部 active 变体
+}
 
 // ─── ProductTemplate NearTime Sync（镜像 PartnerService.Sync/Pull）───────
 
