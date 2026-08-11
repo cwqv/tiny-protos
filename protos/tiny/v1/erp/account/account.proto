@@ -313,3 +313,124 @@ message RegisterPaymentRequest {
 message RegisterPaymentResponse {
   AccountMove move = 1;
 }
+
+// ============================================================
+// Account (account.accounts) — Chart of Accounts 主数据
+// 叶子 lookup 表，无 NearTime sync/pull。
+// 落地计划：docs/account-accounts-tera-landing-plan.md
+// ============================================================
+
+// ─── Account Service ────────────────────────────────────────
+
+service AccountService {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc UpdateAccount(UpdateAccountRequest) returns (UpdateAccountResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc ListAccounts(ListAccountsRequest) returns (ListAccountsResponse);
+}
+
+message AccountProto {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  optional string description = 4;
+  optional string currency_id = 5;
+  optional string code_store = 6;
+  bool active = 7;
+  optional string account_type = 8;
+  bool include_initial_balance = 9;
+  optional string internal_group = 10;
+  bool reconcile = 11;
+  optional string note = 12;
+  bool non_trade = 13;
+  bool display_mapping_tab = 14;
+  string created_at = 15;
+  string updated_at = 16;
+  optional string created_by = 17;
+  optional string updated_by = 18;
+  int32 version = 19;
+}
+
+message AccountSummaryProto {
+  string id = 1;
+  string name = 2;
+  optional string code_store = 3;
+  optional string account_type = 4;
+  optional string internal_group = 5;
+  bool active = 6;
+}
+
+message CreateAccountRequest {
+  string tenant_id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional string currency_id = 4;
+  optional string code_store = 5;
+  optional bool active = 6;
+  optional string account_type = 7;
+  optional string internal_group = 8;
+  optional bool include_initial_balance = 9;
+  optional bool reconcile = 10;
+  optional string note = 11;
+  optional bool non_trade = 12;
+  optional bool display_mapping_tab = 13;
+}
+
+message CreateAccountResponse {
+  AccountProto account = 1;
+}
+
+message UpdateAccountRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string description = 4;
+  optional string currency_id = 5;
+  optional string code_store = 6;
+  optional bool active = 7;
+  optional string account_type = 8;
+  optional string internal_group = 9;
+  optional bool include_initial_balance = 10;
+  optional bool reconcile = 11;
+  optional string note = 12;
+  optional bool non_trade = 13;
+  optional bool display_mapping_tab = 14;
+  int32 version = 15;
+}
+
+message UpdateAccountResponse {
+  AccountProto account = 1;
+}
+
+message DeleteAccountRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message DeleteAccountResponse {
+  bool success = 1;
+}
+
+message GetAccountRequest {
+  string id = 1;
+}
+
+message GetAccountResponse {
+  AccountProto account = 1;
+}
+
+message ListAccountsRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional string account_type = 3;
+  optional string internal_group = 4;
+  optional bool active = 5;
+  optional int64 limit = 6;
+  optional int64 offset = 7;
+}
+
+message ListAccountsResponse {
+  repeated AccountSummaryProto accounts = 1;
+  int32 total_count = 2;
+}
