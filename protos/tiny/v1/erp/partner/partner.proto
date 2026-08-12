@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+package tiny.v1.erp.partner;
+
+// ============================================================
+// ERP Partner Module — res.partner 等价模型
+// ============================================================
+// 从 base.proto 拆出（见 tiny openspec change extract-partner-proto），
+// 使 proto 边界与 erp_partner / erp_partner_server crate 边界对齐。
+
+// ─── Partner ────────────────────────────────────────────────
+
+service PartnerService {
+  rpc CreatePartner(CreatePartnerRequest) returns (CreatePartnerResponse);
+  rpc UpdatePartner(UpdatePartnerRequest) returns (UpdatePartnerResponse);
+  rpc DeletePartner(DeletePartnerRequest) returns (DeletePartnerResponse);
+  rpc GetPartner(GetPartnerRequest) returns (GetPartnerResponse);
+  rpc ListPartners(ListPartnersRequest) returns (ListPartnersResponse);
+  rpc SearchPartners(SearchPartnersRequest) returns (SearchPartnersResponse);
+  // NearTime 同步（写本地 → outbox → 后台批量推送；镜像 TaskService.SyncTasks）
+  rpc SyncPartners(SyncPartnersRequest) returns (SyncPartnersResponse);
+  // 增量拉取 server 变更（按 per-tenant sync_version 游标）
+  rpc PullPartners(PullPartnersRequest) returns (PullPartnersResponse);
+}
+
+message Partner {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional string complete_name = 4;
+  optional string parent_id = 5;
+  optional string ref = 6;
+  optional string lang = 7;
+  optional string tz = 8;
+  optional string user_id = 9;
+  optional string vat = 10;
+  optional string company_registry = 11;
+  optional string website = 12;
+  optional string comment = 13;
+  bool active = 14;
+  bool employee = 15;
+  optional string function = 16;
+  optional string type = 17;
+  optional string street = 18;
+  optional string street2 = 19;
+  optional string zip = 20;
+  optional string city = 21;
+  optional string state_id = 22;
+  optional string country_id = 23;
+  optional double partner_latitude = 24;
+  optional double partner_longitude = 25;
+  optional string email = 26;
+  optional string phone = 27;
+  bool is_company = 28;
+  optional string industry_id = 29;
+  optional string company_type = 30;
+  optional int32 color = 31;
+  bool partner_share = 32;
+  optional string commercial_partner_id = 33;
+  optional string commercial_company_name = 34;
+  optional string company_name = 35;
+  optional string barcode = 36;
+  string created_at = 37;
+  string updated_at = 38;
+  optional string created_by = 39;
+  optional string updated_by = 40;
+  int32 version = 41;
+  bool is_deleted = 42;
+}
+
+message PartnerSummary {
+  string id = 1;
+  optional string name = 2;
+  optional string email = 3;
+  optional string phone = 4;
+  optional string city = 5;
+  optional string country_name = 6;
+  bool is_company = 7;
+  bool active = 8;
+}
+
+message CreatePartnerRequest {
+  string tenant_id = 1;
+  string name = 2;
+  bool is_company = 3;
+  optional string type = 4;
+  optional string parent_id = 5;
+  optional string email = 6;
+  optional string phone = 7;
+  optional string street = 8;
+  optional string street2 = 9;
+  optional string zip = 10;
+  optional string city = 11;
+  optional string state_id = 12;
+  optional string country_id = 13;
+  optional string vat = 14;
+  optional string website = 15;
+  optional string industry_id = 16;
+  optional string lang = 17;
+  optional string comment = 18;
+  optional string barcode = 19;
+  optional string operator_id = 20;
+}
+
+message UpdatePartnerRequest {
+  string id = 1;
+  string tenant_id = 2;
+  optional string name = 3;
+  optional bool is_company = 4;
+  optional string type = 5;
+  optional string parent_id = 6;
+  optional string email = 7;
+  optional string phone = 8;
+  optional string street = 9;
+  optional string street2 = 10;
+  optional string zip = 11;
+  optional string city = 12;
+  optional string state_id = 13;
+  optional string country_id = 14;
+  optional string vat = 15;
+  optional string website = 16;
+  optional string industry_id = 17;
+  optional bool active = 18;
+  optional string comment = 19;
+  int32 version = 20;
+  optional string operator_id = 21;
+}
+
+message DeletePartnerRequest {
+  string id = 1;
+  string tenant_id = 2;
+}
+
+message GetPartnerRequest {
+  string id = 1;
+}
+
+message ListPartnersRequest {
+  string tenant_id = 1;
+  optional string search_query = 2;
+  optional bool is_company = 3;
+  optional string country_id = 4;
+  optional string state_id = 5;
+  optional bool active = 6;
+  optional int64 limit = 7;
+  optional int64 offset = 8;
+}
+
+message SearchPartnersRequest {
+  string tenant_id = 1;
+  string query = 2;
+  int64 limit = 3;
+}
+
+message CreatePartnerResponse {
+  Partner partner = 1;
+}
+
+message UpdatePartnerResponse {
+  Partner partner = 1;
+}
+
+message DeletePartnerResponse {
+  bool success = 1;
+}
+
+message GetPartnerResponse {
+  Partner partner = 1;
+}
+
+message ListPartnersResponse {
+  repeated PartnerSummary partners = 1;
+  int32 total_count = 2;
+}
+
+message SearchPartnersResponse {
+  repeated PartnerSummary partners = 1;
+}
+
+// ─── Partner NearTime Sync（镜像 TaskService.SyncTasks/PullTasks）─────────
+
+message PartnerOperation {
+  string operation_id = 1;   // client outbox event id
+  string entity_uuid = 2;    // partner id
+  string type = 3;           // "create" | "update" | "delete"
+  string payload_json = 4;   // Partner message JSON；delete 时 {"id","tenant_id"}
+  int64 occurred_at = 5;     // client 端事件时间（epoch 秒）
+}
+
+message SyncPartnersRequest {
+  string tenant_id = 1;
+  repeated PartnerOperation operations = 2;
+}
+
+message SyncPartnersResponse {
+  repeated string ack_ids = 1;   // 成功处理的 operation_id 列表
+  repeated PartnerSyncError errors = 2;
+}
+
+message PartnerSyncError {
+  string operation_id = 1;
+  string code = 2;               // DELETE_FAILED | INVALID_PAYLOAD | SAVE_FAILED
+  string message = 3;
+}
+
+message PullPartnersRequest {
+  string tenant_id = 1;
+  int64 last_synced_version = 2; // per-tenant sync_version 游标
+  int32 batch_size = 3;
+}
+
+message PullPartnersResponse {
+  repeated Partner updates = 1;  // 自游标以来变更的 Partner
+  int64 new_version = 2;         // 本批末行的 sync_version（下轮游标）
+  bool has_more = 3;
+}
